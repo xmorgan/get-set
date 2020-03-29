@@ -217,11 +217,6 @@ describe("GetSetHandler", () => {
             assert.doesNotThrow(() => self.id = 0, "entry defined");
         });
 
-        it("throws if value is a function", () => {
-            const self = new GetSet({});
-            assert.throws(() => self.hasOwnProperty = () => true);
-        });
-
         it("throws if type of value does not match pattern", () => {
             const self = new GetSet({
                 id: "Number"

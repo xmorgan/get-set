@@ -136,12 +136,6 @@ export class GetSetHandler {
     set(target, propertyName, value, receiver) {
         const entry = target[propertyName];
 
-        if (entry instanceof Function) {
-            throw [
-                `Cannot override method "${propertyName}".`,
-                "Use class inheritance instead"
-            ].join(" ");
-        }
         if (!(entry instanceof GetSetEntry)) {
             throw [
                 `Cannot set property "${propertyName}".`,
