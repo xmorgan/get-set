@@ -23,15 +23,15 @@ git clone https://github.com/indiejs/get-set.git
 import {GetSet} from "./get-set/index.js";
 
 const post = new GetSet({
-    type: "String",
+    id: "Number",
 });
-console.log(post.type); // undefined
+console.log(post.id); // undefined
 
-post.type = "post";
-console.log(post.type); // post
+post.id = 1;
+console.log(post.id); // 1
 
-post.type = undefined;
-// Error: Property "type" should be of type "String", but got "Undefined"
+post.id = undefined;
+// Error: Property "id" should be of type "Number", but got "Undefined"
 ```
 
 ### Default value
