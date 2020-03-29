@@ -139,29 +139,31 @@ describe("GetSet", () => {
 
     describe("#toJSON(whitelist)", () => {
 
-        it("returns properties in whitelist", () => {
+        it("returns plain object", () => {
             const self = new GetSet({
-                id: ["Number", 0],
-                title: ["String", "Hello World"],
-                date: ["String", "1970"]
+                id: ["Number", 0]
             });
-            assert.deepEqual(self.toJSON(["title", "date"]), {
-                title: "Hello World",
-                date: "1970"
+            assert.deepEqual(self.toJSON(), {
+                id: 0
             });
         });
 
-        it("returns all properties if whitelist is omitted", () => {
+        it("uses whitelist", () => {
             const self = new GetSet({
                 id: ["Number", 0],
-                title: ["String", "Hello World"],
                 date: ["String", "1970"]
             });
-            assert.deepEqual(self.toJSON(), {
-                id: 0,
-                title: "Hello World",
-                date: "1970"
+            assert.deepEqual(self.toJSON(["id"]), {
+                id: 0
             });
+        });
+
+        it("plays nice with JSON.stringify()", () => {
+            const self = new GetSet({
+                id: ["Number", 0],
+                callback: ["Function", () => null]
+            });
+            assert.equal(JSON.stringify(self), "{\"id\":0}");
         });
     });
 

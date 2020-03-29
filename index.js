@@ -38,7 +38,10 @@ export class GetSet {
     /**
         @param {Array<String>} [whitelist]
     */
-    toJSON(whitelist = Object.keys(this)) {
+    toJSON(whitelist) {
+        if (!Array.isArray(whitelist)) {
+            whitelist = Object.keys(this);
+        }
         const json = {};
         for (const name of whitelist) {
             json[name] = this[name];
