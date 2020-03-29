@@ -102,21 +102,27 @@ post.type = "post";
 
 Abstract method. Called when property value did change.
 
-- **name** &mdash; A name of property which value did change
-- **oldValue** &mdash; An old value
-- **newValue** &mdash; A new value
+Argument  | Type             | Description
+----------|------------------|-----------------
+name      | `String`         | A name of property which value did change.
+oldValue  | `Any`            | An old value.
+newValue  | `Any`            | A new value.
 
-### `resetProperties([whitelist])`
+### `resetProperties(whitelist)`
 
 Resets multiple properties ​​to default values.
 
-- **whitelist** &mdash; Optional. A list of properties to include.
+Argument  | Type             | Description
+----------|------------------|-----------------
+whitelist | `Array<String>`  | Optional. A list of properties to reset.
 
-### `toJSON([whitelist])`
+### `toJSON(whitelist)`
 
 Returns plain object.
 
-- **whitelist** &mdash; Optional. A list of properties to include.
+Argument  | Type             | Description
+----------|------------------|-----------------
+whitelist | `Array<String>`  | Optional. A list of properties to include.
 
 ## License
 
