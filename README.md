@@ -1,6 +1,6 @@
 # GetSet
 
-Define property type and value. Be notified on change.
+Set patterns for property type and value. Get notified when property value did change.
 
 **Use cases**
 - An observable options object
@@ -9,7 +9,7 @@ Define property type and value. Be notified on change.
 
 ## Install
 
-Clone this repo at desired location.
+Clone this repository.
 
 ```sh
 git clone https://github.com/indiejs/get-set.git
