@@ -1,6 +1,6 @@
 # GetSet
 
-Set patterns for property type and value. Get notified when property value did change.
+Implementation of typed and observable properties.
 
 **Use cases**
 - An observable options object
