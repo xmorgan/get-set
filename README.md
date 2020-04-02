@@ -124,6 +124,14 @@ Argument  | Type             | Description
 ----------|------------------|-----------------
 whitelist | `Array<String>`  | Optional. A list of properties to include.
 
+### `throwException(...message)`
+
+Throws an exception.
+
+Argument  | Type             | Description
+----------|------------------|-----------------
+message   | `String`         | One or more messages to join.
+
 ## License
 
 Copyright 2020 [Sineway](https://github.com/sineway)

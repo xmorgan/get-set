@@ -28,6 +28,12 @@ export class GetSet {
         // handle or delegate
     }
     /**
+        @param {...String} message
+    */
+    throwException(...message) {
+        throw new Error(message.join(" "));
+    }
+    /**
         @param {Array<String>} [whitelist]
     */
     resetProperties(whitelist = Object.keys(this)) {
@@ -112,18 +118,20 @@ export class GetSetHandler {
     /**
         @param {GetSet} target
         @param {String} propertyName
+        @param {Proxy<GetSet>} [receiver]
     */
-    get(target, propertyName) {
+    get(target, propertyName, receiver = target) {
         const entry = target[propertyName];
 
         if (entry instanceof Function) {
             return entry;
         }
         if (!(entry instanceof GetSetEntry)) {
-            throw [
+            receiver.throwException(
                 `Cannot get property "${propertyName}".`,
                 "Entry was not defined"
-            ].join(" ");
+            );
+            return undefined;
         }
         return entry.value;
     }
@@ -131,34 +139,37 @@ export class GetSetHandler {
         @param {GetSet} target
         @param {String} propertyName
         @param {Any} value
-        @param {Proxy<GetSet>} receiver
+        @param {Proxy<GetSet>} [receiver]
     */
-    set(target, propertyName, value, receiver) {
+    set(target, propertyName, value, receiver = target) {
         const entry = target[propertyName];
 
         if (!(entry instanceof GetSetEntry)) {
-            throw [
+            receiver.throwException(
                 `Cannot set property "${propertyName}".`,
                 "Entry was not defined"
-            ].join(" ");
+            );
+            return false;
         }
         if (value == defaultValueSymbol) {
             entry.reset(target.didChangeProperty, receiver);
             return true;
         }
         if (!entry.acceptsTypeOf(value)) {
-            throw [
+            receiver.throwException(
                 `Property "${entry.name}"`,
                 `should be of type ${entry.typePattern}",`,
                 `but got "${typeOf(value)}"`
-            ].join(" ");
+            );
+            return false;
         }
         if (!entry.accepts(value)) {
-            throw [
+            receiver.throwException(
                 `Property "${entry.name}"`,
                 `should be ${entry.description || `"${entry.valuePattern}"`},`,
                 `but got ${`${value}` ? `"${value}"` : "empty string"}`
-            ].join(" ");
+            );
+            return false;
         }
         entry.assign(value, target.didChangeProperty, receiver);
         return true;
