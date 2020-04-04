@@ -26,7 +26,7 @@ const post = new GetSet({
     id: Number
 });
 post.id = null;
-// Error: Property "id" should be of type "Number", but got "Null"
+// Error: Property 'id' should be of type 'Number', but got 'Null'
 ```
 
 To define multiple types use class name pattern:
@@ -60,7 +60,7 @@ const post = new GetSet({
     type: [String, "post", "post|page"]
 });
 post.type = "";
-// Error: Property "type" should be "post|page", but got empty string
+// Error: Property 'type' should be 'post|page', but got empty string
 
 ```
 You may have noticed that pattern was included in error message.
@@ -72,7 +72,7 @@ const post = new GetSet({
     id: [Number, 0, "[0-9]+", "a positive integer"]
 });
 post.id = -1;
-// Error: Property "id" should be a positive integer, but got "-1"
+// Error: Property 'id' should be a positive integer, but got '-1'
 ```
 
 ### Observable example
