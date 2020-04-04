@@ -7,12 +7,18 @@ Implementation of typed and observable properties.
 - A model that can be safely passed to multiple views
 - Anything else with safe property access, but without getter/setter complexities
 
-## Install
+## Installation
 
-Clone this repository.
+Clone repository:
 
 ```sh
 git clone https://github.com/indiejs/get-set.git
+```
+
+Or install package:
+
+```sh
+npm install indiejs/get-set --save
 ```
 
 ## Usage
