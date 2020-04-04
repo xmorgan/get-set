@@ -17,7 +17,7 @@ git clone https://github.com/indiejs/get-set.git
 
 ## Usage
 
-### Type
+### Property type
 
 ```js
 import {GetSet} from "./get-set/index.js";
