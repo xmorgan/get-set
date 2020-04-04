@@ -1,4 +1,5 @@
 {
     "name": "@indiejs/get-set",
+    "version": "0.1.0",
     "type": "module"
 }
