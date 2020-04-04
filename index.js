@@ -1,14 +1,33 @@
 /**
-    @param {Any} value
-    @returns {String}
+    @module indiejs/get-set
 */
-export const typeOf = (value) => ({}).toString.call(value).slice(8, -1);
+
+/**
+    Detects class name of a value.
+    @private
+    @function
+    @param {Any} value A value.
+    @returns {String} A class name.
+*/
+export const classOf = (value) => {
+    return ({}).toString.call(value).slice(8, -1);
+};
+
+/**
+    Used to reset property to default value.
+    @type {Symbol}
+*/
 export const defaultValueSymbol = Symbol("defaultValue");
 
 export class GetSet {
     /**
-        @param {Object<String, Array>} entries
+        @param {Object} entries A property type/value descriptors.
         @returns {Proxy<GetSet>}
+        @example new GetSet({ id: Number });
+        @example new GetSet({ id: "Number|Null" });
+        @example new GetSet({ id: [Number, 0] });
+        @example new GetSet({ id: [Number, 0, "[0-9]+"] });
+        @example new GetSet({ id: [Number, 0, "[0-9]+", "a positive integer"] });
     */
     constructor(entries) {
         if (arguments.length < 1) {
@@ -20,21 +39,25 @@ export class GetSet {
         return new Proxy(this, new GetSetHandler);
     }
     /**
-        @param {String} propertyName
-        @param {Any} oldValue
-        @param {Any} newValue
+        Called when a property value did change.
+        @abstract
+        @param {String} name A property name.
+        @param {Any} oldValue An old value.
+        @param {Any} newValue A new value.
     */
     didChangeProperty() {
         // handle or delegate
     }
     /**
-        @param {...String} message
+        Throws an exception.
+        @param {...String} message An exception message.
     */
     throwException(...message) {
         throw new Error(message.join(" "));
     }
     /**
-        @param {Array<String>} [whitelist]
+        Resets multiple properties to default values.
+        @param {Array<String>} [whitelist] A list of properties to reset.
     */
     resetProperties(whitelist = Object.keys(this)) {
         for (const name of whitelist) {
@@ -42,7 +65,8 @@ export class GetSet {
         }
     }
     /**
-        @param {Array<String>} [whitelist]
+        Creates a plain object.
+        @param {Array<String>} [whitelist] A list of properties to include.
     */
     toJSON(whitelist) {
         if (!Array.isArray(whitelist)) {
@@ -56,27 +80,39 @@ export class GetSet {
     }
 }
 
+/**
+    @private
+*/
 export class GetSetEntry {
     /**
         @param {String} name
-        @param {String} [typePattern]
+        @param {String|Function} [type]
         @param {Any} [defaultValue]
         @param {String} [valuePattern]
         @param {String} [description]
     */
-    constructor(name, typePattern, defaultValue, valuePattern, description) {
+    constructor(name, type, defaultValue, valuePattern, description) {
         this.name = name;
-        this.typePattern = typePattern;
-        this.defaultValue = this.value = defaultValue;
+
+        if (type instanceof Function) {
+            this.typeConstructor = type;
+        } else {
+            this.typePattern = type;
+        }
+        this.defaultValue = defaultValue;
+        this.value = defaultValue;
         this.valuePattern = valuePattern;
         this.description = description;
     }
     /**
         @param {Any} value
     */
-    acceptsTypeOf(value) {
+    acceptsTypeOf(target) {
+        if (this.typeConstructor) {
+            return Object(target) instanceof this.typeConstructor;
+        }
         if (this.typePattern) {
-            return typeOf(value).search(`^(${this.typePattern})$`) == 0;
+            return classOf(target).search(`^(${this.typePattern})$`) == 0;
         }
         return true;
     }
@@ -92,28 +128,33 @@ export class GetSetEntry {
     /**
         @param {Any} value
         @param {Function} callback
-        @param {Object} [thisArg]
+        @param {Object} [context]
     */
-    assign(value, callback, thisArg) {
+    assign(value, callback, context) {
         const oldValue = this.value;
         const newValue = this.value = value;
         if (!Object.is(oldValue, newValue)) {
-            callback.call(thisArg, this.name, oldValue, newValue);
+            callback.call(context, this.name, oldValue, newValue);
         }
+        return this;
     }
     /**
         @param {Function} callback
-        @param {Object} [thisArg]
+        @param {Object} [context]
     */
-   reset(callback, thisArg) {
+   reset(callback, context) {
         const oldValue = this.value;
         const newValue = this.value = this.defaultValue;
         if (!Object.is(oldValue, newValue)) {
-            callback.call(thisArg, this.name, oldValue, newValue);
+            callback.call(context, this.name, oldValue, newValue);
         }
+        return this;
     }
 }
 
+/**
+    @private
+*/
 export class GetSetHandler {
     /**
         @param {GetSet} target
@@ -128,7 +169,7 @@ export class GetSetHandler {
         }
         if (!(entry instanceof GetSetEntry)) {
             receiver.throwException(
-                `Cannot get property "${propertyName}".`,
+                `Cannot get property '${propertyName}'.`,
                 "Entry was not defined"
             );
             return undefined;
@@ -146,7 +187,7 @@ export class GetSetHandler {
 
         if (!(entry instanceof GetSetEntry)) {
             receiver.throwException(
-                `Cannot set property "${propertyName}".`,
+                `Cannot set property '${propertyName}'.`,
                 "Entry was not defined"
             );
             return false;
@@ -157,17 +198,17 @@ export class GetSetHandler {
         }
         if (!entry.acceptsTypeOf(value)) {
             receiver.throwException(
-                `Property "${entry.name}"`,
-                `should be of type ${entry.typePattern}",`,
-                `but got "${typeOf(value)}"`
+                `Property '${entry.name}' should be of type`,
+                `'${entry.typePattern || entry.typeConstructor.name}',`,
+                `but got '${classOf(value)}'`
             );
             return false;
         }
         if (!entry.accepts(value)) {
             receiver.throwException(
-                `Property "${entry.name}"`,
-                `should be ${entry.description || `"${entry.valuePattern}"`},`,
-                `but got ${`${value}` ? `"${value}"` : "empty string"}`
+                `Property '${entry.name}'`,
+                `should be ${entry.description || `'${entry.valuePattern}'`},`,
+                `but got ${`${value}` ? `'${value}'` : "empty string"}`
             );
             return false;
         }

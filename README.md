@@ -17,21 +17,24 @@ git clone https://github.com/indiejs/get-set.git
 
 ## Usage
 
-### Type pattern
+### Type
 
 ```js
 import {GetSet} from "./get-set/index.js";
 
 const post = new GetSet({
-    id: "Number",
+    id: Number
 });
-console.log(post.id); // undefined
+post.id = null;
+// Error: Property "id" should be of type "Number", but got "Null"
+```
 
-post.id = 1;
-console.log(post.id); // 1
+To define multiple types use class name pattern:
 
-post.id = undefined;
-// Error: Property "id" should be of type "Number", but got "Undefined"
+```js
+new GetSet({
+    id: "Number|Null"
+});
 ```
 
 ### Default value
@@ -40,15 +43,12 @@ post.id = undefined;
 import {GetSet, defaultValueSymbol} from "./get-set/index.js";
 
 const post = new GetSet({
-    type: ["String", "post"]
+    type: [String, "post"]
 });
-console.log(post.type); // post
-
 post.type = "page";
-console.log(post.type); // page
-
+post.type // page
 post.type = defaultValueSymbol;
-console.log(post.type); // post
+post.type // post
 ```
 
 ### Value pattern
@@ -57,7 +57,7 @@ console.log(post.type); // post
 import {GetSet} from "./get-set/index.js";
 
 const post = new GetSet({
-    type: ["String", "post", "post|page"]
+    type: [String, "post", "post|page"]
 });
 post.type = "";
 // Error: Property "type" should be "post|page", but got empty string
@@ -69,7 +69,7 @@ Since not all patterns are such easy to read, you may provide a description, whi
 
 ```js
 const post = new GetSet({
-    id: ["Number", 0, "[0-9]+", "a positive integer"]
+    id: [Number, 0, "[0-9]+", "a positive integer"]
 });
 post.id = -1;
 // Error: Property "id" should be a positive integer, but got "-1"
@@ -83,7 +83,7 @@ import {GetSet} from "./get-set/index.js";
 class Post extends GetSet {
     constructor() {
         super({
-            type: ["String", "post", "post|page"]
+            type: [String, "post", "post|page"]
         });
     }
     didChangeProperty(name, oldValue, newValue) {
@@ -100,29 +100,29 @@ post.type = "post";
 
 ### `didChangeProperty(name, oldValue, newValue)`
 
-Abstract method. Called when property value did change.
+Called when a property value did change.
 
 Argument  | Type             | Description
 ----------|------------------|-----------------
-name      | `String`         | A name of property which value did change.
+name      | `String`         | A property name.
 oldValue  | `Any`            | An old value.
 newValue  | `Any`            | A new value.
 
-### `resetProperties(whitelist)`
+### `resetProperties([whitelist])`
 
-Resets multiple properties ​​to default values.
-
-Argument  | Type             | Description
-----------|------------------|-----------------
-whitelist | `Array<String>`  | Optional. A list of properties to reset.
-
-### `toJSON(whitelist)`
-
-Returns plain object.
+Resets multiple properties to default values.
 
 Argument  | Type             | Description
 ----------|------------------|-----------------
-whitelist | `Array<String>`  | Optional. A list of properties to include.
+whitelist | `Array<String>`  | A list of properties to reset.
+
+### `toJSON([whitelist])`
+
+Creates a plain object.
+
+Argument  | Type             | Description
+----------|------------------|-----------------
+whitelist | `Array<String>`  | A list of properties to include.
 
 ### `throwException(...message)`
 
@@ -130,7 +130,7 @@ Throws an exception.
 
 Argument  | Type             | Description
 ----------|------------------|-----------------
-message   | `String`         | One or more messages to join.
+message   | `String`         | An exception message.
 
 ## License
 
