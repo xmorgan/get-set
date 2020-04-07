@@ -73,7 +73,7 @@ post.resetProperties(["id"]);
 post.id; // 0
 ```
 
-Properties with no default value return `undefined`.
+*Properties with no default value return `undefined`*
 
 ### Possible values
 
