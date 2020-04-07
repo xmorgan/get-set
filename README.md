@@ -41,7 +41,7 @@ post.id = null;
 // Error: Property 'id' should be of type 'Number', but got 'Null'
 ```
 
-*In this case type checked via `instanceof` operator.*
+*In this case type checked by `instanceof` operator.*
 
 Or using class name:
 
@@ -51,7 +51,7 @@ const post = new GetSet({
 });
 ```
 
-*In this case type checked via `toString` method.*
+*In this case type checked against result of `({}).toString.call`*
 
 
 ### Default value
