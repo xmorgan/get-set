@@ -1,11 +1,12 @@
 # GetSet
 
-Implementation of typed and observable properties.
+Create objects with typed and observable properties.
 
-**Use cases**
-- An observable options object
-- A model that can be safely passed to multiple views
-- Anything else with safe property access, but without getter/setter complexities
+**Features**
+- Validation of type and value
+- Error on getting a nonexistent property
+- Notification on value change
+- Reset to defaults
 
 ## Installation
 
@@ -23,7 +24,11 @@ npm install indiejs/get-set --save
 
 ## Usage
 
-### Property type
+### Typed property
+
+There are 2 options to describe a property type.
+
+**Using constructor:**
 
 ```js
 import {GetSet} from "./get-set/index.js";
@@ -35,7 +40,9 @@ post.id = null;
 // Error: Property 'id' should be of type 'Number', but got 'Null'
 ```
 
-To define multiple types use class name pattern:
+In this case type checked via `instanceof` operator.
+
+**Using class name:**
 
 ```js
 new GetSet({
@@ -43,35 +50,36 @@ new GetSet({
 });
 ```
 
+In this case type checked via `toString` method.
+
+
 ### Default value
 
-```js
-import {GetSet, defaultValueSymbol} from "./get-set/index.js";
-
-const post = new GetSet({
-    type: [String, "post"]
-});
-post.type = "page";
-post.type // page
-post.type = defaultValueSymbol;
-post.type // post
-```
-
-### Value pattern
+Default value follows the type:
 
 ```js
 import {GetSet} from "./get-set/index.js";
 
 const post = new GetSet({
-    type: [String, "post", "post|page"]
+    id: [Number, 0]
 });
-post.type = "";
-// Error: Property 'type' should be 'post|page', but got empty string
 
 ```
-You may have noticed that pattern was included in error message.
 
-Since not all patterns are such easy to read, you may provide a description, which will be included in error message instead of a pattern:
+Use `resetProperties` method to reset one or more properties to defaults:
+
+```js
+post.id = 1;
+post.id; // 1
+post.resetProperties(["id"]);
+post.id; // 0
+```
+
+Properties with no default value return `undefined`.
+
+### Possible values
+
+Possible values are described using a pattern, optionally with a hint:
 
 ```js
 const post = new GetSet({
@@ -81,7 +89,9 @@ post.id = -1;
 // Error: Property 'id' should be a positive integer, but got '-1'
 ```
 
-### Observable example
+### Observable object
+
+To observe changes override `didChangeProperty` method:
 
 ```js
 import {GetSet} from "./get-set/index.js";
@@ -89,17 +99,27 @@ import {GetSet} from "./get-set/index.js";
 class Post extends GetSet {
     constructor() {
         super({
-            type: [String, "post", "post|page"]
+            id: [Number, 0, "[0-9]+", "a positive integer"]
         });
     }
     didChangeProperty(name, oldValue, newValue) {
         console.log(`Did change ${name}, new value: ${newValue}`);
     }
 }
-const post = new Post();
+```
 
-post.type = "page";
-post.type = "post";
+Then initialize it and treat like a regular object:
+
+```js
+const post = new Post();
+post.id = 1;
+```
+
+The following will work as expected:
+
+```js
+Object.assign(post, {id: 2}); // {id: 2}
+JSON.stringify(post); // "{\"id\": 2}"
 ```
 
 ## Methods
