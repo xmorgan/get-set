@@ -89,9 +89,9 @@ export class GetSetEntry {
         @param {String|Function} [type]
         @param {Any} [defaultValue]
         @param {String} [valuePattern]
-        @param {String} [description]
+        @param {String} [valueHint]
     */
-    constructor(name, type, defaultValue, valuePattern, description) {
+    constructor(name, type, defaultValue, valuePattern, valueHint) {
         this.name = name;
 
         if (type instanceof Function) {
@@ -102,7 +102,7 @@ export class GetSetEntry {
         this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.valuePattern = valuePattern;
-        this.description = description;
+        this.valueHint = valueHint;
     }
     /**
         @param {Any} value
@@ -207,7 +207,7 @@ export class GetSetHandler {
         if (!entry.accepts(value)) {
             receiver.throwException(
                 `Property '${entry.name}'`,
-                `should be ${entry.description || `'${entry.valuePattern}'`},`,
+                `should be ${entry.valueHint || `'${entry.valuePattern}'`},`,
                 `but got ${`${value}` ? `'${value}'` : "empty string"}`
             );
             return false;
