@@ -28,7 +28,7 @@ The path for import in this case `./get-set/index.js`
 
 There are 2 options to describe a property type.
 
-**Using constructor:**
+Using constructor:
 
 ```js
 import {GetSet} from "@indiejs/get-set";
@@ -41,9 +41,9 @@ post.id = null;
 // Error: Property 'id' should be of type 'Number', but got 'Null'
 ```
 
-In this case type checked via `instanceof` operator.
+*In this case type checked via `instanceof` operator.*
 
-**Using class name:**
+Or using class name:
 
 ```js
 const post = new GetSet({
@@ -51,7 +51,7 @@ const post = new GetSet({
 });
 ```
 
-In this case type checked via `toString` method.
+*In this case type checked via `toString` method.*
 
 
 ### Default value
