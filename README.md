@@ -20,7 +20,7 @@ Or clone repository:
 git clone https://github.com/indiejs/get-set.git
 ```
 
-The path for import in this case `./get-set/index.js`
+*The path for import `./get-set/index.js`*
 
 ## Usage
 
