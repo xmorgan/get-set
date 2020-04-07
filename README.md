@@ -10,17 +10,17 @@ Create objects with typed and observable properties.
 
 ## Installation
 
-Clone repository:
+```sh
+npm install indiejs/get-set --save
+```
+
+Or clone repository:
 
 ```sh
 git clone https://github.com/indiejs/get-set.git
 ```
 
-Or install package:
-
-```sh
-npm install indiejs/get-set --save
-```
+The path for import in this case `./get-set/index.js`
 
 ## Usage
 
@@ -31,11 +31,12 @@ There are 2 options to describe a property type.
 **Using constructor:**
 
 ```js
-import {GetSet} from "./get-set/index.js";
+import {GetSet} from "@indiejs/get-set";
 
 const post = new GetSet({
     id: Number
 });
+
 post.id = null;
 // Error: Property 'id' should be of type 'Number', but got 'Null'
 ```
@@ -45,7 +46,7 @@ In this case type checked via `instanceof` operator.
 **Using class name:**
 
 ```js
-new GetSet({
+const post = new GetSet({
     id: "Number|Null"
 });
 ```
@@ -58,12 +59,9 @@ In this case type checked via `toString` method.
 Default value follows the type:
 
 ```js
-import {GetSet} from "./get-set/index.js";
-
 const post = new GetSet({
     id: [Number, 0]
 });
-
 ```
 
 Use `resetProperties` method to reset one or more properties to defaults:
@@ -85,6 +83,7 @@ Possible values are described using a pattern, optionally with a hint:
 const post = new GetSet({
     id: [Number, 0, "[0-9]+", "a positive integer"]
 });
+
 post.id = -1;
 // Error: Property 'id' should be a positive integer, but got '-1'
 ```
@@ -94,8 +93,6 @@ post.id = -1;
 To observe changes override `didChangeProperty` method:
 
 ```js
-import {GetSet} from "./get-set/index.js";
-
 class Post extends GetSet {
     constructor() {
         super({
