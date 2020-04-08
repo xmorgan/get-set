@@ -1,4 +1,4 @@
-# GetSet
+# @indiejs/get-set
 
 Create objects with typed and observable properties.
 
