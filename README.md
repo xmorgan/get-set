@@ -125,7 +125,7 @@ JSON.stringify(post); // "{\"id\": 2}"
 
 Called when a property value did change.
 
-Argument  | Type             | Description
+Parameter | Type             | Description
 ----------|------------------|-----------------
 name      | `String`         | A property name.
 oldValue  | `Any`            | An old value.
@@ -135,7 +135,7 @@ newValue  | `Any`            | A new value.
 
 Resets multiple properties to default values.
 
-Argument  | Type             | Description
+Parameter | Type             | Description
 ----------|------------------|-----------------
 whitelist | `Array<String>`  | A list of properties to reset.
 
@@ -143,7 +143,7 @@ whitelist | `Array<String>`  | A list of properties to reset.
 
 Creates a plain object.
 
-Argument  | Type             | Description
+Parameter | Type             | Description
 ----------|------------------|-----------------
 whitelist | `Array<String>`  | A list of properties to include.
 
@@ -151,7 +151,7 @@ whitelist | `Array<String>`  | A list of properties to include.
 
 Throws an exception.
 
-Argument  | Type             | Description
+Parameter | Type             | Description
 ----------|------------------|-----------------
 message   | `String`         | An exception message.
 
