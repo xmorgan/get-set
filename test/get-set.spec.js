@@ -1,21 +1,17 @@
 import {strict as assert} from "assert";
 import {GetSet} from "../lib/get-set.js";
 
-describe("GetSet", () => {
+describe("new GetSet(entries)", () => {
 
-    describe("#constructor()", () => {
+    it("requires 1 argument", () => {
+        assert.throws(() => new GetSet);
+    });
 
-        it("requires 1 argument", () => {
-            assert.throws(() => new GetSet);
+    it("defines own properties", () => {
+        const self = new GetSet({
+            id: Number
         });
-
-        it("defines own properties", () => {
-            const self = new GetSet({
-                id: Number
-            });
-            assert.deepEqual(Object.keys(self), ["id"]);
-        });
-
+        assert.deepEqual(Object.keys(self), ["id"]);
     });
 
     describe("#resetProperties([whitelist])", () => {
