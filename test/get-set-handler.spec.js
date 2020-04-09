@@ -2,7 +2,7 @@ import {strict as assert} from "assert";
 import {GetSet} from "../lib/get-set.js";
 import {defaultValueSymbol} from "../lib/get-set-handler.js";
 
-describe("GetSetHandler", () => {
+describe("new GetSetHandler()", () => {
 
     describe("#get(target, propertyName[, receiver])", () => {
 
