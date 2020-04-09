@@ -1,7 +1,7 @@
 import {strict as assert} from "assert";
 import {GetSetEntry} from "../lib/get-set-entry.js";
 
-describe("GetSetEntry", () => {
+describe("new GetSetEntry(name, ...rest)", () => {
 
     describe("#acceptsTypeOf(value)", () => {
 
