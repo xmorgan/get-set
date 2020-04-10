@@ -3,7 +3,7 @@
 Create objects with typed and observable properties.
 
 **Features**
-- Validation of type and value
+- Custom validation of type and value
 - Error on getting a nonexistent property
 - Notification on value change
 - Reset to defaults
@@ -26,33 +26,48 @@ git clone https://github.com/indiejs/get-set.git
 
 ### Typed property
 
-There are 2 options to describe a property type.
+There are three ways to describe a property type.
 
-Using constructor:
+1). Using a class name pattern:
 
 ```js
 import {GetSet} from "@indiejs/get-set";
 
 const post = new GetSet({
-    id: Number
+    id: "Number"
 });
-
-post.id = null;
-// Error: Property 'id' should be of type 'Number', but got 'Null'
-```
-
-*In this case type checked by `instanceof` operator.*
-
-Or using class name:
-
-```js
-const post = new GetSet({
-    id: "Number|Null"
-});
+post.id = "0";
+// Error: Property 'id' should be of type 'Number', but got 'String'
 ```
 
 *In this case type checked against result of `({}).toString.call`*
 
+2). Using a `type()` function:
+
+```js
+import {GetSet, type} from "@indiejs/get-set";
+
+const post = new GetSet({
+    id: type(Number)
+});
+post.id = "0";
+// Error: Property 'id' does not accept type of value '0'
+```
+
+*In this case type checked by `instanceof` operator.*
+
+3). Using a custom function:
+
+```js
+const isNumber = (value) => {
+    return typeof value == "number";
+};
+const post = new GetSet({
+    id: isNumber
+});
+post.id = "0";
+// Error: Property 'id' does not accept type of value '0'
+```
 
 ### Default value
 
@@ -60,32 +75,51 @@ Default value follows the type:
 
 ```js
 const post = new GetSet({
-    id: [Number, 0]
+    id: ["Number", 0]
 });
+post.id = 1;
 ```
 
-Use `resetProperties` method to reset one or more properties to defaults:
+Use `resetProperties()` to reset one or more properties to defaults:
 
 ```js
-post.id = 1;
 post.id; // 1
-post.resetProperties(["id"]);
+post.resetProperties();
 post.id; // 0
 ```
 
-*Properties with no default value return `undefined`*
-
 ### Possible values
 
-Possible values are described using a pattern, optionally with a hint:
+There are two ways to describe possible values.
+
+1). Using a pattern with optional hint:
 
 ```js
 const post = new GetSet({
-    id: [Number, 0, "[0-9]+", "a positive integer"]
+    id: ["Number", 0, "[0-9]+", "a positive integer"]
 });
-
 post.id = -1;
 // Error: Property 'id' should be a positive integer, but got '-1'
+```
+
+2). Using a custom function:
+
+```js
+const post = new GetSet({
+    id: ["Number", 0, Number.isSafeInteger]
+});
+post.id = Math.pow(2, 53);
+// Error: Property 'id' does not accept value '9007199254740992'
+```
+
+To describe a value that cannot be changed, use `constant`:
+
+```js
+import {GetSet, constant} from "@indiejs/get-set";
+
+const post = new GetSet({
+    id: [constant, 1]
+});
 ```
 
 ### Observable object
@@ -96,7 +130,7 @@ To observe changes override `didChangeProperty` method:
 class Post extends GetSet {
     constructor() {
         super({
-            id: [Number, 0, "[0-9]+", "a positive integer"]
+            id: ["Number", 0, "[0-9]+", "a positive integer"]
         });
     }
     didChangeProperty(name, oldValue, newValue) {

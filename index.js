@@ -1,2 +1,2 @@
 export {GetSet} from "./lib/get-set.js";
-export {defaultValueSymbol} from "./lib/get-set-handler.js";
+export {constant, type} from "./lib/utilities.js";

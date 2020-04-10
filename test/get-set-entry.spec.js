@@ -7,20 +7,12 @@ describe("new GetSetEntry(name, ...rest)", () => {
 
         it("returns true if type matches", () => {
             assert.equal(
-                new GetSetEntry("id", Number).acceptsTypeOf(0),
-                true
-            );
-            assert.equal(
                 new GetSetEntry("id", "Number").acceptsTypeOf(0),
                 true
             );
         });
 
         it("returns false if type does not match", () => {
-            assert.equal(
-                new GetSetEntry("id", Number).acceptsTypeOf("0"),
-                false
-            );
             assert.equal(
                 new GetSetEntry("id", "Number").acceptsTypeOf("0"),
                 false
@@ -34,20 +26,31 @@ describe("new GetSetEntry(name, ...rest)", () => {
             );
         });
 
+        it("utilizes custom type validator", () => {
+            assert.equal(
+                new GetSetEntry("id", () => true).acceptsTypeOf(0),
+                true
+            );
+            assert.equal(
+                new GetSetEntry("id", () => false).acceptsTypeOf(0),
+                false
+            );
+        });
+
     });
 
     describe("#accepts(value)", () => {
 
         it("returns true if value matches", () => {
             assert.equal(
-                new GetSetEntry("id", Number, 0, "[0-9]+").accepts(0),
+                new GetSetEntry("id", "Number", 0, "[0-9]+").accepts(0),
                 true
             );
         });
 
         it("returns false if value does not match", () => {
             assert.equal(
-                new GetSetEntry("id", Number, 0, "[0-9]+").accepts(-1),
+                new GetSetEntry("id", "Number", 0, "[0-9]+").accepts(-1),
                 false
             );
         });
@@ -56,6 +59,17 @@ describe("new GetSetEntry(name, ...rest)", () => {
             assert.equal(
                 new GetSetEntry("id").accepts(-1),
                 true
+            );
+        });
+
+        it("utilizes custom value validator", () => {
+            assert.equal(
+                new GetSetEntry("id", "Number", 0, () => true).accepts(-1),
+                true
+            );
+            assert.equal(
+                new GetSetEntry("id", "Number", 0, () => false).accepts(-1),
+                false
             );
         });
 

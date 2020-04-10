@@ -16,57 +16,16 @@ describe("new GetSet(entries)", () => {
 
     it("defines own properties", () => {
         const self = new GetSet({
-            id: Number
+            id: "Number"
         });
         assert.deepEqual(Object.keys(self), ["id"]);
-    });
-
-    describe("#resetProperties([whitelist])", () => {
-
-        it("resets properties in whitelist", () => {
-            const self = new GetSet({
-                id: Number,
-                title: String,
-                date: String
-            });
-            Object.assign(self, {
-                id: 0,
-                title: "Hello World",
-                date: "1970"
-            });
-            self.resetProperties([
-                "title",
-                "date"
-            ]);
-            assert.equal(self.id, 0);
-            assert.equal(self.title, undefined);
-            assert.equal(self.date, undefined);
-        });
-
-        it("resets all properties if whitelist is omitted", () => {
-            const self = new GetSet({
-                id: Number,
-                title: String,
-                date: String
-            });
-            Object.assign(self, {
-                id: 0,
-                title: "Hello World",
-                date: "1970"
-            });
-            self.resetProperties();
-            assert.equal(self.id, undefined);
-            assert.equal(self.title, undefined);
-            assert.equal(self.date, undefined);
-        });
-
     });
 
     describe("#toJSON([whitelist])", () => {
 
         it("returns plain object", () => {
             const self = new GetSet({
-                id: [Number, 0]
+                id: ["Number", 0]
             });
             assert.deepEqual(self.toJSON(), {
                 id: 0
@@ -75,8 +34,8 @@ describe("new GetSet(entries)", () => {
 
         it("respects whitelist", () => {
             const self = new GetSet({
-                id: [Number, 0],
-                date: [String, "1970"]
+                id: ["Number", 0],
+                date: ["String", "1970"]
             });
             assert.deepEqual(self.toJSON(["id"]), {
                 id: 0
@@ -85,10 +44,48 @@ describe("new GetSet(entries)", () => {
 
         it("plays nice with JSON.stringify()", () => {
             const self = new GetSet({
-                id: [Number, 0],
-                callback: [Function, () => null]
+                id: ["Number", 0],
+                callback: ["Function", () => null]
             });
             assert.equal(JSON.stringify(self), "{\"id\":0}");
+        });
+
+    });
+
+    describe("#resetProperties([whitelist])", () => {
+
+        it("resets properties in whitelist", () => {
+            const self = new GetSet({
+                id: "Number",
+                title: "String"
+            });
+            Object.assign(self, {
+                id: 0,
+                title: "Hello World"
+            });
+            self.resetProperties([
+                "title"
+            ]);
+            assert.deepEqual(self.toJSON(), {
+                id: 0,
+                title: undefined
+            });
+        });
+
+        it("resets all properties if whitelist is omitted", () => {
+            const self = new GetSet({
+                id: "Number",
+                title: "String"
+            });
+            Object.assign(self, {
+                id: 0,
+                title: "Hello World"
+            });
+            self.resetProperties();
+            assert.deepEqual(self.toJSON(), {
+                id: undefined,
+                title: undefined
+            });
         });
 
     });
@@ -99,7 +96,7 @@ describe("new GetSet(entries)", () => {
             class Post extends GetSet {
                 constructor() {
                     super({
-                        id: Number
+                        id: "Number"
                     });
                 }
                 didChangeProperty() {

@@ -1,48 +1,46 @@
 import {strict as assert} from "assert";
 import {GetSet} from "../lib/get-set.js";
-import {defaultValueSymbol} from "../lib/get-set-handler.js";
+import {defaultValueSymbol} from "../lib/utilities.js";
 
 describe("new GetSetHandler()", () => {
 
     describe("#get(target, propertyName[, receiver])", () => {
 
-        it("throws if there is no corresponding GetSetEntry", () => {
-            const self = new GetSet({
-                id: Number
+        it("throws if property was not described", () => {
+            assert.throws(() => {
+                new GetSet({}).id;
+            }, {
+                message: "Cannot get property 'id'. It was not described"
             });
-            assert.throws(() => self.ID, {
-                message: "Cannot get property 'ID'. Entry was not defined"
+            assert.doesNotThrow(() => {
+                new GetSet({id: ""}).id;
             });
-            assert.doesNotThrow(() => self.id);
         });
 
-        it("returns functions as is", () => {
-            assert.equal(
-                new GetSet({}).hasOwnProperty,
-                ({}).hasOwnProperty
-            );
+        it("ignores methods", () => {
+            assert.doesNotThrow(() => {
+                new GetSet({}).hasOwnProperty;
+            });
         });
 
     });
 
     describe("#set(target, propertyName, value[, receiver])", () => {
 
-        it("throws if there is no GetSetEntry", () => {
-            const self = new GetSet({
-                id: Number
+        it("throws if property was not described", () => {
+            new GetSet({
             });
-            assert.throws(() => self.ID = 0, {
-                message: "Cannot set property 'ID'. Entry was not defined"
+            assert.throws(() => {
+                new GetSet({}).id = 0;
+            }, {
+                message: "Cannot set property 'id'. It was not described"
             });
-            assert.doesNotThrow(() => self.id = 0);
+            assert.doesNotThrow(() => {
+                new GetSet({id: ""}).id = 0;
+            });
         });
 
         it("throws if type does not match", () => {
-            assert.throws(() => {
-                new GetSet({id: Number}).id = "0";
-            }, {
-                message: "Property 'id' should be of type 'Number', but got 'String'"
-            });
             assert.throws(() => {
                 new GetSet({id: "Number"}).id = "0";
             }, {
@@ -50,19 +48,37 @@ describe("new GetSetHandler()", () => {
             });
         });
 
+        it("throws if custom type validator returns false", () => {
+            assert.throws(() => {
+                new GetSet({id: () => false}).id = "0";
+            }, {
+                message: "Property 'id' does not accept type of value '0'"
+            });
+        });
+
         it("throws if value does not match", () => {
             assert.throws(() => {
                 new GetSet({
-                    id: [Number, 0, "[0-9]+", "a positive integer"]
+                    id: ["Number", 0, "[0-9]+", "a positive integer"]
                 }).id = -1;
             }, {
                 message: "Property 'id' should be a positive integer, but got '-1'"
             });
         });
 
+        it("throws if custom value validator returns false", () => {
+            assert.throws(() => {
+                new GetSet({
+                    id: ["Number", 0, () => false]
+                }).id = -1;
+            }, {
+                message: "Property 'id' does not accept value '-1'"
+            });
+        });
+
         it("assigns value ", () => {
             const self = new GetSet({
-                id: [Number, 0, "[0-9]+"]
+                id: ["Number", 0, "[0-9]+"]
             });
             self.id = 1;
             assert.equal(self.id, 1);
@@ -70,7 +86,7 @@ describe("new GetSetHandler()", () => {
 
         it("resets value by defaultValueSymbol", () => {
             const self = new GetSet({
-                id: [Number, 0, "[0-9]+"]
+                id: ["Number", 0, "[0-9]+"]
             });
             self.id = 1;
             self.id = defaultValueSymbol;
@@ -83,12 +99,14 @@ describe("new GetSetHandler()", () => {
 
         it("prevents override of GetSetEntry", () => {
             const self = new GetSet({
-                id: [Number, 0, "[0-9]+"]
+                id: "Number"
             });
             assert.throws(() => {
                 Object.defineProperty(self, "id", {
-                    value: -1
+                    value: null
                 });
+            }, {
+                message: "Property 'id' should be of type 'Number', but got 'Null'"
             });
         });
 
