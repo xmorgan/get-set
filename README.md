@@ -88,6 +88,8 @@ post.resetProperties();
 post.id; // 0
 ```
 
+Also you may import and assign `defaultValueSymbol` to any described property to achieve the same effect.
+
 ### Possible values
 
 There are two ways to describe possible values.
