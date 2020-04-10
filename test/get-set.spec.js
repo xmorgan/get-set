@@ -4,7 +4,14 @@ import {GetSet} from "../lib/get-set.js";
 describe("new GetSet(entries)", () => {
 
     it("requires 1 argument", () => {
-        assert.throws(() => new GetSet);
+        assert.throws(() => {
+            new GetSet();
+        }, {
+            message: "Required 1 argument"
+        });
+        assert.doesNotThrow(() => {
+            new GetSet({});
+        });
     });
 
     it("defines own properties", () => {
