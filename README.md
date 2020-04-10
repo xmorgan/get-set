@@ -4,7 +4,7 @@ Create objects with typed and observable properties.
 
 **Features**
 - Custom validation of type and value
-- Error on getting a nonexistent property
+- Error on getting not described property
 - Notification on value change
 - Reset to defaults
 
