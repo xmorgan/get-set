@@ -122,6 +122,8 @@ import {GetSet, constant} from "@indiejs/get-set";
 const post = new GetSet({
     id: [constant, 1]
 });
+post.id = 0;
+// Error: Property 'id' is constant
 ```
 
 ### Observable object

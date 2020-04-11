@@ -1,6 +1,6 @@
 import {strict as assert} from "assert";
 import {GetSet} from "../lib/get-set.js";
-import {defaultValueSymbol} from "../lib/utilities.js";
+import {constant, defaultValueSymbol} from "../lib/utilities.js";
 
 describe("new GetSetHandler()", () => {
 
@@ -40,7 +40,7 @@ describe("new GetSetHandler()", () => {
             });
         });
 
-        it("throws if type does not match", () => {
+        it("throws if type does not match pattern", () => {
             assert.throws(() => {
                 new GetSet({id: "Number"}).id = "0";
             }, {
@@ -56,7 +56,7 @@ describe("new GetSetHandler()", () => {
             });
         });
 
-        it("throws if value does not match", () => {
+        it("throws if value does not match pattern", () => {
             assert.throws(() => {
                 new GetSet({
                     id: ["Number", 0, "[0-9]+", "a positive integer"]
@@ -73,6 +73,16 @@ describe("new GetSetHandler()", () => {
                 }).id = -1;
             }, {
                 message: "Property 'id' does not accept value '-1'"
+            });
+        });
+
+        it("throws if value cannot be changed", () => {
+            assert.throws(() => {
+                new GetSet({
+                    id: [constant, 1]
+                }).id = 0;
+            }, {
+                message: "Property 'id' is constant"
             });
         });
 
