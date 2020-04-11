@@ -17,9 +17,15 @@ describe("new GetSetHandler()", () => {
             });
         });
 
-        it("ignores methods", () => {
+        it("allows access existing methods", () => {
             assert.doesNotThrow(() => {
                 new GetSet({}).hasOwnProperty;
+            });
+        });
+
+        it("allows access reserved methods", () => {
+            assert.doesNotThrow(() => {
+                new GetSet({}).then;
             });
         });
 
