@@ -6,27 +6,20 @@ describe("new GetSetHandler()", () => {
 
     describe("#get(target, propertyName[, receiver])", () => {
 
-        it("throws if property was not described", () => {
-            assert.throws(() => {
-                new GetSet({}).id;
-            }, {
-                message: "Cannot get property 'id'. It was not described"
-            });
-            assert.doesNotThrow(() => {
-                new GetSet({id: ""}).id;
-            });
+        it("returns entry value", () => {
+            assert.equal(
+                new GetSet({
+                    id: [Number, 0]
+                }).id,
+                0
+            );
         });
 
-        it("allows access existing methods", () => {
-            assert.doesNotThrow(() => {
-                new GetSet({}).hasOwnProperty;
-            });
-        });
-
-        it("allows access reserved methods", () => {
-            assert.doesNotThrow(() => {
-                new GetSet({}).then;
-            });
+        it("returns non-entry as is", () => {
+            assert.equal(
+                new GetSet({}).id,
+                undefined
+            );
         });
 
     });
@@ -34,8 +27,6 @@ describe("new GetSetHandler()", () => {
     describe("#set(target, propertyName, value[, receiver])", () => {
 
         it("throws if property was not described", () => {
-            new GetSet({
-            });
             assert.throws(() => {
                 new GetSet({}).id = 0;
             }, {
@@ -45,6 +36,7 @@ describe("new GetSetHandler()", () => {
                 new GetSet({id: ""}).id = 0;
             });
         });
+
 
         it("throws if type does not match pattern", () => {
             assert.throws(() => {
