@@ -3,5 +3,12 @@
     "version": "0.1.0",
     "type": "module",
     "main": "index.js",
-    "files": ["index.js", "lib"]
+    "files": [
+        "index.js",
+        "lib"
+    ],
+    "scripts": {
+        "test": "chokidar '*.js' '{lib,test}/*.js' --initial -c 'eslint {path} && mocha -R min'",
+        "doc": "chokidar '*.md' 'lib/*.js' --initial -c 'jsdoc lib -d doc -R README.md --verbose'"
+    }
 }
