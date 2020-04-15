@@ -1,6 +1,5 @@
 import {strict as assert} from "assert";
-import {GetSet} from "../lib/get-set.js";
-import {constant, defaultValueSymbol} from "../lib/utilities.js";
+import {GetSet, constant, defaultValueSymbol} from "../index.js";
 
 describe("new GetSetHandler()", () => {
 

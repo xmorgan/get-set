@@ -1,5 +1,5 @@
 import {strict as assert} from "assert";
-import {GetSet} from "../lib/get-set.js";
+import {GetSet} from "../index.js";
 
 describe("new GetSet(entries)", () => {
 

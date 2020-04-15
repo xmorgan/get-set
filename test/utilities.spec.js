@@ -1,5 +1,5 @@
 import {strict as assert} from "assert";
-import {type} from "../lib/utilities.js";
+import {type} from "../index.js";
 
 describe("type(...constructor)", () => {
 
