@@ -176,31 +176,47 @@ describe("new Proxy({}, new GetSetHandler)", () => {
 
     describe("#defineProperty(target, property, descriptor)", () => {
 
-        it("Throws, if descriptor value is not a GetSetEntry", () => {
+        it("Throws, if property exists", () => {
             const proxy = new Proxy({}, new GetSetHandler);
 
             assert.throws(() => {
-                Object.defineProperty(proxy, "id", {
-                    value: 1
-                });
-            });
-            assert.doesNotThrow(() => {
-                Object.defineProperty(proxy, "id", {
-                    value: new GetSetEntry({})
-                });
+                Object.defineProperty(proxy, "__proto__", {});
+            }, {
+                message: "Cannot override property '__proto__'"
             });
         });
 
-        it("Throws, if property exists", () => {
-            const proxy = new Proxy({
-                id: new GetSetEntry({})
-            }, new GetSetHandler);
+        it("Creates GetSetEntry from descriptor value", () => {
+            const proxy = new Proxy({}, new GetSetHandler);
 
-            assert.throws(() => {
-                Object.defineProperty(proxy, "id", {
-                    value: new GetSetEntry({})
-                });
+            Object.defineProperty(proxy, "id", {
+                value: {
+                    pattern: "[0-9]+",
+                    value: 1
+                }
             });
+            assert.throws(() => {
+                proxy.id = -1;
+            });
+            assert.equal(
+                proxy.id,
+                1
+            );
+        });
+
+        it("Defines GetSet as read-only", () => {
+            const proxy = new Proxy({}, new GetSetHandler);
+
+            Object.defineProperty(proxy, "attributes", {
+                value: new GetSet({})
+            });
+            assert.throws(() => {
+                proxy.attributes = null;
+            });
+            assert.equal(
+                proxy.attributes instanceof GetSet,
+                true
+            );
         });
 
     });

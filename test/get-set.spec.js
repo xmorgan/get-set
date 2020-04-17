@@ -15,11 +15,10 @@ describe("new GetSet(entries)", () => {
     });
 
     it("Defines properties", () => {
-        const post = new GetSet({
-            id: "Number"
-        });
         assert.equal(
-            "id" in post,
+            "id" in new GetSet({
+                id: null
+            }),
             true
         );
     });
@@ -44,8 +43,8 @@ describe("new GetSet(entries)", () => {
 
         it("Resets properties", () => {
             const post = new GetSet({
-                id: "Number",
-                title: "String"
+                id: null,
+                title: null
             });
             Object.assign(post, {
                 id: 1,
@@ -64,8 +63,8 @@ describe("new GetSet(entries)", () => {
 
         it("Recognizes whitelist", () => {
             const post = new GetSet({
-                id: "Number",
-                title: "String"
+                id: null,
+                title: null
             });
             Object.assign(post, {
                 id: 1,
@@ -90,8 +89,12 @@ describe("new GetSet(entries)", () => {
         it("Creates plain object", () => {
             assert.deepEqual(
                 new GetSet({
-                    id: ["Number", 1],
-                    date: ["String", "1970"]
+                    id: {
+                        value: 1
+                    },
+                    date: {
+                        value: "1970"
+                    }
                 }).toJSON(),
                 {
                     id: 1,
@@ -103,8 +106,12 @@ describe("new GetSet(entries)", () => {
         it("Recognizes whitelist", () => {
             assert.deepEqual(
                 new GetSet({
-                    id: ["Number", 1],
-                    date: ["String", "1970"]
+                    id: {
+                        value: 1
+                    },
+                    date: {
+                        value: "1970"
+                    }
                 }).toJSON([
                     "id"
                 ]),
@@ -116,8 +123,12 @@ describe("new GetSet(entries)", () => {
 
         it("Compatible with JSON.stringify()", () => {
             const post = new GetSet({
-                id: ["Number", 1],
-                date: ["String", "1970"]
+                id: {
+                    value: 1
+                },
+                date: {
+                    value: "1970"
+                }
             });
             assert.equal(
                 JSON.stringify(post),
