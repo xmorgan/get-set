@@ -1,147 +1,199 @@
 import {strict as assert} from "assert";
 import {GetSetEntry} from "../index.js";
 
-describe("new GetSetEntry(name, ...rest)", () => {
+describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
 
-    describe("#acceptsTypeOf(value)", () => {
+    it("Requires 1 argument", () => {
+        assert.throws(() => {
+            new GetSetEntry;
+        });
+        assert.doesNotThrow(() => {
+            new GetSetEntry({});
+        });
+    });
 
-        it("returns true if type matches", () => {
+    it("Defines #name", () => {
+        assert.equal(
+            new GetSetEntry({
+                name: "id"
+            }).name,
+            "id"
+        );
+    });
+
+    it("Defines #type, if provided type is a string", () => {
+        assert.equal(
+            new GetSetEntry({
+                type: "Number"
+            }).type,
+            "Number"
+        );
+    });
+
+    it("Defines #matchesTypeOf, if provided type is a function", () => {
+        const test = () => true;
+        assert.equal(
+            new GetSetEntry({
+                type: test
+            }).matchesTypeOf,
+            test
+        );
+    });
+
+    it("Throws, if provided type neither a string, nor a function", () => {
+        assert.throws(() => {
+            new GetSetEntry({
+                type: null
+            });
+        }, {
+            message: "Cannot define type, using null"
+        });
+    });
+
+    it("Defines #value and #defaultValue", () => {
+        const entry = new GetSetEntry({
+            value: 1
+        });
+        assert.equal(
+            entry.value,
+            1
+        );
+        assert.equal(
+            entry.defaultValue,
+            1
+        );
+    });
+
+    it("Defines #pattern, if provided pattern is a string", () => {
+        assert.equal(
+            new GetSetEntry({
+                pattern: "[0-9]+"
+            }).pattern,
+            "[0-9]+"
+        );
+    });
+
+    it("Defines #matches, if provided pattern is a function", () => {
+        const test = () => true;
+        assert.equal(
+            new GetSetEntry({
+                pattern: test
+            }).matches,
+            test
+        );
+    });
+
+    it("Throws, if provided pattern neither a string, nor a function", () => {
+        assert.throws(() => {
+            new GetSetEntry({
+                pattern: null
+            });
+        }, {
+            message: "Cannot define pattern, using null"
+        });
+    });
+
+    it("Defines #hint", () => {
+        assert.equal(
+            new GetSetEntry({
+                hint: "a some kind"
+            }).hint,
+            "a some kind"
+        );
+    });
+
+    describe("#matchesTypeOf(value)", () => {
+
+        it("Returns true, if #type matches", () => {
+            const entry = new GetSetEntry({
+                type: "Number|Null"
+            });
             assert.equal(
-                new GetSetEntry("id", "Number").acceptsTypeOf(0),
+                entry.matchesTypeOf(0),
+                true
+            );
+            assert.equal(
+                entry.matchesTypeOf(null),
                 true
             );
         });
 
-        it("returns false if type does not match", () => {
+        it("Returns false, if #type does not match", () => {
+            const entry = new GetSetEntry({
+                type: "Number|Null"
+            });
             assert.equal(
-                new GetSetEntry("id", "Number").acceptsTypeOf("0"),
+                entry.matchesTypeOf("0"),
+                false
+            );
+            assert.equal(
+                entry.matchesTypeOf(),
                 false
             );
         });
 
-        it("always returns true if no type was provided", () => {
+        it("Always returns true, if #type undefined", () => {
             assert.equal(
-                new GetSetEntry("id").acceptsTypeOf("0"),
+                new GetSetEntry({}).matchesTypeOf(),
                 true
-            );
-        });
-
-        it("utilizes custom type validator", () => {
-            assert.equal(
-                new GetSetEntry("id", () => true).acceptsTypeOf(0),
-                true
-            );
-            assert.equal(
-                new GetSetEntry("id", () => false).acceptsTypeOf(0),
-                false
             );
         });
 
     });
 
-    describe("#accepts(value)", () => {
+    describe("#matches(value)", () => {
 
-        it("returns true if value matches", () => {
+        it("Returns true, if #pattern matches", () => {
             assert.equal(
-                new GetSetEntry("id", "Number", 0, "[0-9]+").accepts(0),
+                new GetSetEntry({
+                    pattern: "[0-9]+"
+                }).matches("123"),
                 true
             );
         });
 
-        it("returns false if value does not match", () => {
+        it("Returns false, if #pattern does not match", () => {
             assert.equal(
-                new GetSetEntry("id", "Number", 0, "[0-9]+").accepts(-1),
+                new GetSetEntry({
+                    pattern: "[0-9]+"
+                }).matches("_123_"),
                 false
             );
         });
 
-        it("always returns true if no value pattern was provided", () => {
+        it("Always returns true, if #pattern undefined", () => {
             assert.equal(
-                new GetSetEntry("id").accepts(-1),
+                new GetSetEntry({}).matches(),
                 true
-            );
-        });
-
-        it("utilizes custom value validator", () => {
-            assert.equal(
-                new GetSetEntry("id", "Number", 0, () => true).accepts(-1),
-                true
-            );
-            assert.equal(
-                new GetSetEntry("id", "Number", 0, () => false).accepts(-1),
-                false
             );
         });
 
     });
 
-    describe("#assign(value, callback[, context])", () => {
+    describe("#update(value, callback[, context])", () => {
 
-        it("assigns value", () => {
+        it("Updates #value", () => {
             assert.equal(
-                new GetSetEntry("id")
-                    .assign(0, () => null)
+                new GetSetEntry({})
+                    .update(1, () => null)
                     .value,
-                0
+                1
             );
         });
 
-        it("calls back with propertyName, oldValue, newValue", (done) => {
-            new GetSetEntry("id")
-                .assign(0, (name, oldValue, newValue) => {
+        it("Calls back, if a change has occurred", (done) => {
+            const context = {
+                callback(name, newValue, oldValue) {
+                    assert.equal(this, context);
                     assert.equal(name, "id");
+                    assert.equal(newValue, 1);
                     assert.equal(oldValue, undefined);
-                    assert.equal(newValue, 0);
-                    done();
-                });
-        });
-
-        it("respects 'context' argument", (done) => {
-            const context = {
-                callback() {
-                    assert.equal(this, context);
                     done();
                 }
             };
-            new GetSetEntry("id")
-                .assign(0, context.callback, context);
-        });
-
-    });
-
-    describe("#reset(callback[, context])", () => {
-
-        it("resets value to default", () => {
-            assert.equal(
-                new GetSetEntry("id")
-                    .assign(0, () => null)
-                    .reset(() => null)
-                    .value,
-                undefined
-            );
-        });
-
-        it("calls back with propertyName, oldValue, newValue", (done) => {
-            new GetSetEntry("id")
-                .assign(0, () => null)
-                .reset((name, oldValue, newValue) => {
-                    assert.equal(name, "id");
-                    assert.equal(oldValue, 0);
-                    assert.equal(newValue, undefined);
-                    done();
-                });
-        });
-
-        it("respects 'context' argument", (done) => {
-            const context = {
-                callback() {
-                    assert.equal(this, context);
-                    done();
-                }
-            };
-            new GetSetEntry("id")
-                .assign(0, () => null)
-                .reset(context.callback, context);
+            new GetSetEntry({
+                name: "id"
+            }).update(1, context.callback, context);
         });
 
     });

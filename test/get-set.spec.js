@@ -3,7 +3,7 @@ import {GetSet} from "../index.js";
 
 describe("new GetSet(entries)", () => {
 
-    it("requires 1 argument", () => {
+    it("Requires 1 argument", () => {
         assert.throws(() => {
             new GetSet();
         }, {
@@ -14,98 +14,115 @@ describe("new GetSet(entries)", () => {
         });
     });
 
-    it("defines own properties", () => {
-        const self = new GetSet({
+    it("Defines properties", () => {
+        const post = new GetSet({
             id: "Number"
         });
-        assert.deepEqual(Object.keys(self), ["id"]);
+        assert.equal(
+            "id" in post,
+            true
+        );
     });
 
-    describe("#toJSON([whitelist])", () => {
+    it.skip("Returns proxy", () => {
+        // Any chance to test this?
+    });
 
-        it("returns plain object", () => {
-            const self = new GetSet({
-                id: ["Number", 0]
-            });
-            assert.deepEqual(self.toJSON(), {
-                id: 0
-            });
-        });
+    describe("#throwException(...message)", () => {
 
-        it("respects whitelist", () => {
-            const self = new GetSet({
-                id: ["Number", 0],
-                date: ["String", "1970"]
+        it("Throws an exception", () => {
+            assert.throws(() => {
+                new GetSet({}).throwException("Hello", "World");
+            }, {
+                message: "Hello World"
             });
-            assert.deepEqual(self.toJSON(["id"]), {
-                id: 0
-            });
-        });
-
-        it("plays nice with JSON.stringify()", () => {
-            const self = new GetSet({
-                id: ["Number", 0],
-                callback: ["Function", () => null]
-            });
-            assert.equal(JSON.stringify(self), "{\"id\":0}");
         });
 
     });
 
     describe("#resetProperties([whitelist])", () => {
 
-        it("resets properties in whitelist", () => {
-            const self = new GetSet({
+        it("Resets properties", () => {
+            const post = new GetSet({
                 id: "Number",
                 title: "String"
             });
-            Object.assign(self, {
-                id: 0,
+            Object.assign(post, {
+                id: 1,
                 title: "Hello World"
-            });
-            self.resetProperties([
-                "title"
-            ]);
-            assert.deepEqual(self.toJSON(), {
-                id: 0,
-                title: undefined
-            });
+            }).resetProperties();
+
+            assert.equal(
+                post.id,
+                undefined
+            );
+            assert.equal(
+                post.title,
+                undefined
+            );
         });
 
-        it("resets all properties if whitelist is omitted", () => {
-            const self = new GetSet({
+        it("Recognizes whitelist", () => {
+            const post = new GetSet({
                 id: "Number",
                 title: "String"
             });
-            Object.assign(self, {
-                id: 0,
+            Object.assign(post, {
+                id: 1,
                 title: "Hello World"
-            });
-            self.resetProperties();
-            assert.deepEqual(self.toJSON(), {
-                id: undefined,
-                title: undefined
-            });
+            }).resetProperties([
+                "title"
+            ]);
+            assert.equal(
+                post.id,
+                1
+            );
+            assert.equal(
+                post.title,
+                undefined
+            );
         });
 
     });
 
-    describe("#didChangeProperty(name, oldValue, newValue)", () => {
+    describe("#toJSON([whitelist])", () => {
 
-        it("is called in proper context", (done) => {
-            class Post extends GetSet {
-                constructor() {
-                    super({
-                        id: "Number"
-                    });
+        it("Creates plain object", () => {
+            assert.deepEqual(
+                new GetSet({
+                    id: ["Number", 1],
+                    date: ["String", "1970"]
+                }).toJSON(),
+                {
+                    id: 1,
+                    date: "1970"
                 }
-                didChangeProperty() {
-                    assert.equal(this, post);
-                    done();
+            );
+        });
+
+        it("Recognizes whitelist", () => {
+            assert.deepEqual(
+                new GetSet({
+                    id: ["Number", 1],
+                    date: ["String", "1970"]
+                }).toJSON([
+                    "id"
+                ]),
+                {
+                    id: 1
                 }
-            }
-            const post = new Post();
-            post.id = 1;
+            );
+        });
+
+        it("Compatible with JSON.stringify()", () => {
+            const post = new GetSet({
+                id: ["Number", 1],
+                date: ["String", "1970"]
+            });
+            assert.equal(
+                JSON.stringify(post),
+                "{\"id\":1,\"date\":\"1970\"}"
+            );
         });
 
     });

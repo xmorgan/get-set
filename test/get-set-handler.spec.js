@@ -1,132 +1,225 @@
 import {strict as assert} from "assert";
-import {GetSet, constant, defaultValueSymbol} from "../index.js";
+import {GetSet, GetSetEntry, GetSetHandler, readOnly, defaultValue} from "../index.js";
 
-describe("new GetSetHandler()", () => {
+const {throwException, didChangeProperty} = GetSet.prototype;
 
-    describe("#get(target, propertyName[, receiver])", () => {
+describe("new Proxy({}, new GetSetHandler)", () => {
 
-        it("returns entry value", () => {
+    describe("#get(target, property)", () => {
+
+        it("Returns #value of a GetSetEntry", () => {
             assert.equal(
-                new GetSet({
-                    id: [Number, 0]
-                }).id,
-                0
+                new Proxy({
+                    id: new GetSetEntry({
+                        value: 1
+                    })
+                }, new GetSetHandler)
+                    .id,
+                1
             );
         });
 
-        it("returns non-entry as is", () => {
+        it("Returns regular values", () => {
             assert.equal(
-                new GetSet({}).id,
+                new Proxy({
+                    id: 1
+                }, new GetSetHandler)
+                    .id,
+                1
+            );
+        });
+
+    });
+
+    describe("#set(target, property, value, receiver)", () => {
+
+        it("Throws, if a property value is not a GetSetEntry", () => {
+            assert.throws(() => {
+                new Proxy({
+                    throwException
+                }, new GetSetHandler)
+                    .id = 1;
+            }, {
+                message: "Cannot set property 'id'. It was not described"
+            });
+            assert.doesNotThrow(() => {
+                new Proxy({
+                    id: new GetSetEntry({
+                        value: 1
+                    })
+                }, new GetSetHandler)
+                    .id = 1;
+            });
+        });
+
+        it("Throws, if a property is read-only", () => {
+            assert.throws(() => {
+                const id = new GetSetEntry({
+                    type: readOnly
+                });
+                new Proxy({
+                    throwException,
+                    id
+                }, new GetSetHandler)
+                    .id = 1;
+            }, {
+                message: "Cannot set property 'id'. It is read-only"
+            });
+        });
+
+        it("Throws, if #type does not match", () => {
+            assert.throws(() => {
+                const id = new GetSetEntry({
+                    type: "Number"
+                });
+                new Proxy({
+                    throwException,
+                    id
+                }, new GetSetHandler)
+                    .id = "1";
+            }, {
+                message: "Cannot set property 'id'. It does not match type Number"
+            });
+        });
+
+        it("Throws, if #type function returns false", () => {
+            assert.throws(() => {
+                const id = new GetSetEntry({
+                    type: () => false
+                });
+                new Proxy({
+                    throwException,
+                    id
+                }, new GetSetHandler)
+                    .id = null;
+            }, {
+                message: "Cannot set property 'id'. It does not match type pattern"
+            });
+        });
+
+        it("Throws, if #pattern does not match ", () => {
+            assert.throws(() => {
+                const id = new GetSetEntry({
+                    pattern: "[0-9]+"
+                });
+                new Proxy({
+                    throwException,
+                    id
+                }, new GetSetHandler)
+                    .id = "-123";
+            }, {
+                message: "Cannot set property 'id'. It does not match [0-9]+"
+            });
+            assert.throws(() => {
+                const id = new GetSetEntry({
+                    pattern: "[0-9]+",
+                    hint: "positive integer"
+                });
+                new Proxy({
+                    throwException,
+                    id
+                }, new GetSetHandler)
+                    .id = "-123";
+            }, {
+                message: "Cannot set property 'id'. It does not match positive integer"
+            });
+        });
+
+        it("Throws, if #pattern function returns false", () => {
+            assert.throws(() => {
+                const id = new GetSetEntry({
+                    pattern: () => false
+                });
+                new Proxy({
+                    throwException,
+                    id
+                }, new GetSetHandler)
+                    .id = null;
+            }, {
+                message: "Cannot set property 'id'. It does not match pattern"
+            });
+        });
+
+        it("Updates a property value", () => {
+            const id = new GetSetEntry({});
+
+            const proxy = new Proxy({
+                didChangeProperty,
+                id
+            }, new GetSetHandler);
+
+            proxy.id = 1;
+            assert.equal(
+                proxy.id,
+                1
+            );
+        });
+
+        it("Recognizes default value symbol", () => {
+            const id = new GetSetEntry({});
+
+            const proxy = new Proxy({
+                didChangeProperty,
+                id
+            }, new GetSetHandler);
+
+            proxy.id = 1;
+            proxy.id = defaultValue;
+
+            assert.equal(
+                proxy.id,
                 undefined
             );
         });
 
     });
 
-    describe("#set(target, propertyName, value[, receiver])", () => {
+    describe("#defineProperty(target, property, descriptor)", () => {
 
-        it("throws if property was not described", () => {
+        it("Throws, if descriptor value is not a GetSetEntry", () => {
+            const proxy = new Proxy({}, new GetSetHandler);
+
             assert.throws(() => {
-                new GetSet({}).id = 0;
-            }, {
-                message: "Cannot set property 'id'. It was not described"
+                Object.defineProperty(proxy, "id", {
+                    value: 1
+                });
             });
             assert.doesNotThrow(() => {
-                new GetSet({id: ""}).id = 0;
-            });
-        });
-
-
-        it("throws if type does not match pattern", () => {
-            assert.throws(() => {
-                new GetSet({id: "Number"}).id = "0";
-            }, {
-                message: "Property 'id' should be of type 'Number', but got 'String'"
-            });
-        });
-
-        it("throws if custom type validator returns false", () => {
-            assert.throws(() => {
-                new GetSet({id: () => false}).id = "0";
-            }, {
-                message: "Property 'id' does not accept type of value '0'"
-            });
-        });
-
-        it("throws if value does not match pattern", () => {
-            assert.throws(() => {
-                new GetSet({
-                    id: ["Number", 0, "[0-9]+", "a positive integer"]
-                }).id = -1;
-            }, {
-                message: "Property 'id' should be a positive integer, but got '-1'"
-            });
-        });
-
-        it("throws if custom value validator returns false", () => {
-            assert.throws(() => {
-                new GetSet({
-                    id: ["Number", 0, () => false]
-                }).id = -1;
-            }, {
-                message: "Property 'id' does not accept value '-1'"
-            });
-        });
-
-        it("throws if value cannot be changed", () => {
-            assert.throws(() => {
-                new GetSet({
-                    id: [constant, 1]
-                }).id = 0;
-            }, {
-                message: "Property 'id' is constant"
-            });
-        });
-
-        it("assigns value ", () => {
-            const self = new GetSet({
-                id: ["Number", 0, "[0-9]+"]
-            });
-            self.id = 1;
-            assert.equal(self.id, 1);
-        });
-
-        it("resets value by defaultValueSymbol", () => {
-            const self = new GetSet({
-                id: ["Number", 0, "[0-9]+"]
-            });
-            self.id = 1;
-            self.id = defaultValueSymbol;
-            assert.equal(self.id, 0);
-        });
-
-    });
-
-    describe("#defineProperty(target, propertyName, descriptor)", () => {
-
-        it("prevents override of GetSetEntry", () => {
-            const self = new GetSet({
-                id: "Number"
-            });
-            assert.throws(() => {
-                Object.defineProperty(self, "id", {
-                    value: null
+                Object.defineProperty(proxy, "id", {
+                    value: new GetSetEntry({})
                 });
-            }, {
-                message: "Property 'id' should be of type 'Number', but got 'Null'"
+            });
+        });
+
+        it("Throws, if property exists", () => {
+            const proxy = new Proxy({
+                id: new GetSetEntry({})
+            }, new GetSetHandler);
+
+            assert.throws(() => {
+                Object.defineProperty(proxy, "id", {
+                    value: new GetSetEntry({})
+                });
             });
         });
 
     });
 
-    describe("#getOwnPropertyDescriptor(target, propertyName)", () => {
+    describe("#getOwnPropertyDescriptor(target, property)", () => {
 
-        it("makes GetSetEntry unreachable", () => {
-            const self = new GetSet({
-                id: ["Number", 0]
-            });
-            const {value} = Object.getOwnPropertyDescriptor(self, "id");
-            assert.equal(value, 0);
+        it("Returns #value of GetSetEntry", () => {
+            const proxy = new Proxy({
+                id: new GetSetEntry({
+                    value: 1
+                })
+            }, new GetSetHandler);
+
+            assert.equal(
+                Object
+                    .getOwnPropertyDescriptor(proxy, "id")
+                    .value,
+                1
+            );
         });
 
     });
