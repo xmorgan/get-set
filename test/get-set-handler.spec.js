@@ -100,7 +100,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
         it("Throws, if #pattern does not match ", () => {
             assert.throws(() => {
                 const id = new GetSetEntry({
-                    pattern: "[0-9]+"
+                    pattern: /^[0-9]+/
                 });
                 new Proxy({
                     throwException,
@@ -108,11 +108,11 @@ describe("new Proxy({}, new GetSetHandler)", () => {
                 }, new GetSetHandler)
                     .id = "-123";
             }, {
-                message: "Cannot set property 'id'. It does not match [0-9]+"
+                message: "Cannot set property 'id'. It does not match /^[0-9]+/"
             });
             assert.throws(() => {
                 const id = new GetSetEntry({
-                    pattern: "[0-9]+",
+                    pattern: /^[0-9]+/,
                     hint: "positive integer"
                 });
                 new Proxy({
@@ -191,7 +191,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
 
             Object.defineProperty(proxy, "id", {
                 value: {
-                    pattern: "[0-9]+",
+                    pattern: /^[0-9]+/,
                     value: 1
                 }
             });

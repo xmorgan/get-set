@@ -46,7 +46,7 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
                 type: null
             });
         }, {
-            message: "Cannot define type, using null"
+            message: "Cannot define 'type', using null (Null)"
         });
     });
 
@@ -64,32 +64,33 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         );
     });
 
-    it("Defines #pattern, if provided pattern is a string", () => {
+    it("Defines #pattern, if provided pattern is a regexp", () => {
+        const value = /[0-9]+/;
         assert.equal(
             new GetSetEntry({
-                pattern: "[0-9]+"
+                pattern: value
             }).pattern,
-            "[0-9]+"
+            value
         );
     });
 
     it("Defines #matches, if provided pattern is a function", () => {
-        const test = () => true;
+        const value = () => true;
         assert.equal(
             new GetSetEntry({
-                pattern: test
+                pattern: value
             }).matches,
-            test
+            value
         );
     });
 
-    it("Throws, if provided pattern neither a string, nor a function", () => {
+    it("Throws, if provided pattern neither a regexp, nor a function", () => {
         assert.throws(() => {
             new GetSetEntry({
                 pattern: null
             });
         }, {
-            message: "Cannot define pattern, using null"
+            message: "Cannot define 'pattern', using null (Null)"
         });
     });
 
@@ -146,7 +147,7 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         it("Returns true, if #pattern matches", () => {
             assert.equal(
                 new GetSetEntry({
-                    pattern: "[0-9]+"
+                    pattern: /^[0-9]+/
                 }).matches("123"),
                 true
             );
@@ -155,8 +156,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         it("Returns false, if #pattern does not match", () => {
             assert.equal(
                 new GetSetEntry({
-                    pattern: "[0-9]+"
-                }).matches("_123_"),
+                    pattern: /^[0-9]+/
+                }).matches("_123"),
                 false
             );
         });
