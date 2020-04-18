@@ -1,7 +1,9 @@
 import {strict as assert} from "assert";
-import {GetSetEntry} from "../index.js";
+import {GetSetEntry, GetSet} from "../index.js";
 
-describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
+const {didChangeProperty, willThrow} = GetSet.prototype;
+
+describe("new GetSetEntry({name, type, value, pattern, hint}[, owner])", () => {
 
     it("Requires 1 argument", () => {
         assert.throws(() => {
@@ -16,7 +18,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.equal(
             new GetSetEntry({
                 name: "id"
-            }).name,
+            })
+                .name,
             "id"
         );
     });
@@ -25,7 +28,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.equal(
             new GetSetEntry({
                 type: "Number"
-            }).type,
+            })
+                .type,
             "Number"
         );
     });
@@ -35,7 +39,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.equal(
             new GetSetEntry({
                 type: test
-            }).matchesTypeOf,
+            })
+                .matchesTypeOf,
             test
         );
     });
@@ -44,6 +49,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.throws(() => {
             new GetSetEntry({
                 type: null
+            }, {
+                willThrow
             });
         }, {
             message: "Cannot define 'type', using null (Null)"
@@ -69,7 +76,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.equal(
             new GetSetEntry({
                 pattern: value
-            }).pattern,
+            })
+                .pattern,
             value
         );
     });
@@ -79,7 +87,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.equal(
             new GetSetEntry({
                 pattern: value
-            }).matches,
+            })
+                .matches,
             value
         );
     });
@@ -88,6 +97,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.throws(() => {
             new GetSetEntry({
                 pattern: null
+            }, {
+                willThrow
             });
         }, {
             message: "Cannot define 'pattern', using null (Null)"
@@ -98,7 +109,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
         assert.equal(
             new GetSetEntry({
                 hint: "a some kind"
-            }).hint,
+            })
+                .hint,
             "a some kind"
         );
     });
@@ -148,7 +160,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
             assert.equal(
                 new GetSetEntry({
                     pattern: /^[0-9]+/
-                }).matches("123"),
+                })
+                    .matches("123"),
                 true
             );
         });
@@ -157,7 +170,8 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
             assert.equal(
                 new GetSetEntry({
                     pattern: /^[0-9]+/
-                }).matches("_123"),
+                })
+                    .matches("_123"),
                 false
             );
         });
@@ -171,30 +185,31 @@ describe("new GetSetEntry({name, type, value, pattern, hint})", () => {
 
     });
 
-    describe("#update(value, callback[, context])", () => {
+    describe("#update(value)", () => {
 
         it("Updates #value", () => {
             assert.equal(
-                new GetSetEntry({})
-                    .update(1, () => null)
+                new GetSetEntry({}, {didChangeProperty})
+                    .update(1)
                     .value,
                 1
             );
         });
 
-        it("Calls back, if a change has occurred", (done) => {
-            const context = {
-                callback(name, newValue, oldValue) {
-                    assert.equal(this, context);
+        it("Calls owner, if a change has occurred", (done) => {
+            const owner = {
+                didChangeProperty({name, oldValue, newValue}) {
+                    assert.equal(this, owner);
                     assert.equal(name, "id");
-                    assert.equal(newValue, 1);
                     assert.equal(oldValue, undefined);
+                    assert.equal(newValue, 1);
                     done();
                 }
             };
             new GetSetEntry({
                 name: "id"
-            }).update(1, context.callback, context);
+            }, owner)
+                .update(1);
         });
 
     });

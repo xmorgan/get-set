@@ -1,7 +1,7 @@
 import {strict as assert} from "assert";
-import {GetSet, GetSetEntry, GetSetHandler, readOnly, defaultValue} from "../index.js";
+import {GetSetHandler, GetSetEntry, GetSet, readOnly, defaultValue} from "../index.js";
 
-const {throwException, didChangeProperty} = GetSet.prototype;
+const {willThrow, didChangeProperty} = GetSet.prototype;
 
 describe("new Proxy({}, new GetSetHandler)", () => {
 
@@ -36,7 +36,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
         it("Throws, if a property value is not a GetSetEntry", () => {
             assert.throws(() => {
                 new Proxy({
-                    throwException
+                    willThrow
                 }, new GetSetHandler)
                     .id = 1;
             }, {
@@ -58,7 +58,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
                     type: readOnly
                 });
                 new Proxy({
-                    throwException,
+                    willThrow,
                     id
                 }, new GetSetHandler)
                     .id = 1;
@@ -73,7 +73,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
                     type: "Number"
                 });
                 new Proxy({
-                    throwException,
+                    willThrow,
                     id
                 }, new GetSetHandler)
                     .id = "1";
@@ -88,7 +88,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
                     type: () => false
                 });
                 new Proxy({
-                    throwException,
+                    willThrow,
                     id
                 }, new GetSetHandler)
                     .id = null;
@@ -103,7 +103,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
                     pattern: /^[0-9]+/
                 });
                 new Proxy({
-                    throwException,
+                    willThrow,
                     id
                 }, new GetSetHandler)
                     .id = "-123";
@@ -116,7 +116,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
                     hint: "positive integer"
                 });
                 new Proxy({
-                    throwException,
+                    willThrow,
                     id
                 }, new GetSetHandler)
                     .id = "-123";
@@ -131,7 +131,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
                     pattern: () => false
                 });
                 new Proxy({
-                    throwException,
+                    willThrow,
                     id
                 }, new GetSetHandler)
                     .id = null;
@@ -141,10 +141,9 @@ describe("new Proxy({}, new GetSetHandler)", () => {
         });
 
         it("Updates a property value", () => {
-            const id = new GetSetEntry({});
+            const id = new GetSetEntry({}, {didChangeProperty});
 
             const proxy = new Proxy({
-                didChangeProperty,
                 id
             }, new GetSetHandler);
 
@@ -156,10 +155,9 @@ describe("new Proxy({}, new GetSetHandler)", () => {
         });
 
         it("Recognizes default value symbol", () => {
-            const id = new GetSetEntry({});
+            const id = new GetSetEntry({}, {didChangeProperty});
 
             const proxy = new Proxy({
-                didChangeProperty,
                 id
             }, new GetSetHandler);
 
@@ -176,47 +174,15 @@ describe("new Proxy({}, new GetSetHandler)", () => {
 
     describe("#defineProperty(target, property, descriptor)", () => {
 
-        it("Throws, if property exists", () => {
-            const proxy = new Proxy({}, new GetSetHandler);
-
+        it("Throws, if not enabled", () => {
             assert.throws(() => {
+                const proxy = new Proxy({}, new GetSetHandler);
                 Object.defineProperty(proxy, "__proto__", {});
-            }, {
-                message: "Cannot override property '__proto__'"
             });
-        });
-
-        it("Creates GetSetEntry from descriptor value", () => {
-            const proxy = new Proxy({}, new GetSetHandler);
-
-            Object.defineProperty(proxy, "id", {
-                value: {
-                    pattern: /^[0-9]+/,
-                    value: 1
-                }
+            assert.doesNotThrow(() => {
+                const proxy = new Proxy({}, new GetSetHandler({defineProperty: true}));
+                Object.defineProperty(proxy, "__proto__", {});
             });
-            assert.throws(() => {
-                proxy.id = -1;
-            });
-            assert.equal(
-                proxy.id,
-                1
-            );
-        });
-
-        it("Defines GetSet as read-only", () => {
-            const proxy = new Proxy({}, new GetSetHandler);
-
-            Object.defineProperty(proxy, "attributes", {
-                value: new GetSet({})
-            });
-            assert.throws(() => {
-                proxy.attributes = null;
-            });
-            assert.equal(
-                proxy.attributes instanceof GetSet,
-                true
-            );
         });
 
     });

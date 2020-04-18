@@ -15,48 +15,94 @@ describe("new GetSet(entries)", () => {
     });
 
     it("Defines properties", () => {
+        const post = new GetSet({
+            author: new GetSet({
+                name: {}
+            })
+        });
         assert.equal(
-            "id" in new GetSet({
-                id: null
-            }),
+            "author" in post,
+            true
+        );
+        assert.equal(
+            "name" in post.author,
             true
         );
     });
 
-    it.skip("Returns proxy", () => {
-        // Any chance to test this?
+    it("Defines GetSet entries as read-only", () => {
+        const post = new GetSet({
+            author: new GetSet({
+                name: {}
+            })
+        });
+        assert.throws(() => {
+            post.author = null;
+        });
+        assert.doesNotThrow(() => {
+            post.author.name = null;
+        });
     });
 
-    describe("#throwException(...message)", () => {
+    describe("#didChangeProperty({name, oldValue, newValue})", () => {
 
-        it("Throws an exception", () => {
-            assert.throws(() => {
-                new GetSet({}).throwException("Hello", "World");
-            }, {
-                message: "Hello World"
-            });
+        it("Called with proper arguments", (done) => {
+            class Post extends GetSet {
+                constructor() {
+                    super({
+                        author: new GetSet({
+                            name: {}
+                        })
+                    });
+                }
+                didChangeProperty({name}) {
+                    assert.equal(this, post);
+                    assert.equal(name, "author.name");
+                    done();
+                }
+            }
+            const post = new Post;
+            post.author.name = "";
         });
 
     });
 
-    describe("#resetProperties([whitelist])", () => {
+    describe("#willThrow(exception)", () => {
+
+        it("Called in a proxy context", (done) => {
+            class Post extends GetSet {
+                constructor() {
+                    super({
+                        id: {
+                            type: "Number"
+                        }
+                    });
+                }
+                willThrow(exception) {
+                    assert.equal(this, post);
+                    assert.equal(exception instanceof Error, true);
+                    done();
+                }
+            }
+            const post = new Post;
+            post.id = "";
+        });
+
+    });
+
+    describe("#toDefaults([whitelist])", () => {
 
         it("Resets properties", () => {
             const post = new GetSet({
-                id: null,
-                title: null
+                author: new GetSet({
+                    name: {}
+                })
             });
-            Object.assign(post, {
-                id: 1,
-                title: "Hello World"
-            }).resetProperties();
+            post.author.name = "John";
+            post.toDefaults();
 
             assert.equal(
-                post.id,
-                undefined
-            );
-            assert.equal(
-                post.title,
+                post.author.name,
                 undefined
             );
         });
@@ -69,7 +115,7 @@ describe("new GetSet(entries)", () => {
             Object.assign(post, {
                 id: 1,
                 title: "Hello World"
-            }).resetProperties([
+            }).toDefaults([
                 "title"
             ]);
             assert.equal(
@@ -89,16 +135,14 @@ describe("new GetSet(entries)", () => {
         it("Creates plain object", () => {
             assert.deepEqual(
                 new GetSet({
-                    id: {
-                        value: 1
-                    },
-                    date: {
-                        value: "1970"
-                    }
+                    author: new GetSet({
+                        name: {}
+                    })
                 }).toJSON(),
                 {
-                    id: 1,
-                    date: "1970"
+                    author: {
+                        name: undefined
+                    }
                 }
             );
         });
@@ -106,33 +150,28 @@ describe("new GetSet(entries)", () => {
         it("Recognizes whitelist", () => {
             assert.deepEqual(
                 new GetSet({
-                    id: {
-                        value: 1
-                    },
-                    date: {
-                        value: "1970"
-                    }
+                    id: {},
+                    date: {}
                 }).toJSON([
                     "id"
                 ]),
                 {
-                    id: 1
+                    id: undefined
                 }
             );
         });
 
         it("Compatible with JSON.stringify()", () => {
             const post = new GetSet({
-                id: {
-                    value: 1
-                },
-                date: {
-                    value: "1970"
-                }
+                author: new GetSet({
+                    name: {
+                        value: ""
+                    }
+                })
             });
             assert.equal(
                 JSON.stringify(post),
-                "{\"id\":1,\"date\":\"1970\"}"
+                '{"author":{"name":""}}'
             );
         });
 
