@@ -1,6 +1,8 @@
 {
     "name": "@indiejs/get-set",
+    "description": "Create objects with typed and observable properties",
     "version": "0.1.0",
+
     "type": "module",
     "main": "index.js",
     "files": [
@@ -8,7 +10,13 @@
         "lib"
     ],
     "scripts": {
-        "test": "chokidar '*.js' '{lib,test}/*.js' --initial -c 'eslint {path} && mocha -R min'",
-        "doc": "chokidar '*.md' 'lib/*.js' --initial -c 'jsdoc lib -d doc -R README.md --verbose'"
-    }
+        "lint": "eslint --cache {.,lib,test}/*.js",
+        "test": "mocha --reporter spec",
+        "watch": "chokidar {.,lib,test}/*.js",
+        "watch/test": "npm run watch -- --initial -c 'npm run lint & npm run test'",
+        "build/doc": "documentation build lib/ --format html --output ./",
+        "watch/doc": "npm run build/doc -- --watch"
+    },
+    "repository": "github:indiejs/get-set",
+    "license": "SEE LICENSE IN README"
 }
