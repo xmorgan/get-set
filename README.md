@@ -1,196 +1,212 @@
-# @indiejs/get-set
-
-Create objects with typed and observable properties.
-
-**Features**
-- Custom validation of type and value
-- Notification on value change
-- Reset to defaults
+- [Installation](#installation)
+- [Usage](#usage)
+- [API reference](#)
+- [License](#license)
 
 ## Installation
 
-```sh
-npm install indiejs/get-set --save
+```shell
+> npm install indiejs/get-set --save
+```
+
+```javascript
+import {GetSet} from "@indiejs/get-set";
 ```
 
 Or clone repository:
 
-```sh
-git clone https://github.com/indiejs/get-set.git
+```shell
+> git clone https://github.com/indiejs/get-set.git
 ```
 
-*The path for import `./get-set/index.js`*
+```javascript
+import {GetSet} from "./get-set/index.js";
+```
 
 ## Usage
 
-### Typed property
+### Type pattern
 
-There are three ways to describe a property type.
-
-1). Using a class name pattern:
-
-```js
-import {GetSet} from "@indiejs/get-set";
-
+```javascript
 const post = new GetSet({
-    id: "Number"
+    date: {
+        type: "String|Number"
+    }
 });
-post.id = "0";
-// Error: Property 'id' should be of type 'Number', but got 'String'
+
+post.date = new Date;
+// Error: Entry 'date': The type pattern (String|Number) does not match value type (Date)
+
 ```
 
-*In this case type checked against result of `({}).toString.call`*
+#### Custom validity
 
-2). Using a `type()` function:
-
-```js
-import {GetSet, type} from "@indiejs/get-set";
-
+```javascript
 const post = new GetSet({
-    id: type(Number)
+    date: {
+        type(value) {
+            if (typeof value == "string" || typeof value == "number") {
+                return true;
+            }
+            throw "Invalid type";
+        }
+    }
 });
-post.id = "0";
-// Error: Property 'id' does not accept type of value '0'
+
+post.date = new Date;
+// Error: Invalid type
 ```
 
-*In this case type checked by `instanceof` operator.*
+### Value pattern
 
-3). Using a custom function:
-
-```js
-const isNumber = (value) => {
-    return typeof value == "number";
-};
+```javascript
 const post = new GetSet({
-    id: isNumber
+    date: {
+        type: "String",
+        pattern: /^\d{4}-\d{2}-\d{2}$/,
+        hint: "yyyy-mm-dd"
+    }
 });
-post.id = "0";
-// Error: Property 'id' does not accept type of value '0'
+
+post.date = "1970";
+// Error: Entry 'date': The yyyy-mm-dd pattern does not match value 1970
+```
+
+#### Custom validity
+
+```javascript
+const post = new GetSet({
+    date: {
+        type: "String",
+        pattern(value) {
+            if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                return true;
+            }
+            throw "Invalid format";
+        }
+    }
+});
+
+post.date = "1970";
+// Error: Invalid format
 ```
 
 ### Default value
 
-Default value follows the type:
-
-```js
+```javascript
 const post = new GetSet({
-    id: ["Number", 0]
+    date: {
+        type: "String",
+        pattern: /^\d{4}-\d{2}-\d{2}$/,
+        hint: "yyyy-mm-dd",
+        value: "1970-01-01"
+    }
 });
-post.id = 1;
-```
 
-Use `resetProperties()` to reset one or more properties to defaults:
-
-```js
-post.id; // 1
+post.date = "2020-01-01";
 post.resetProperties();
-post.id; // 0
+post.date;
+// 1970-01-01
 ```
 
-Also you may import and assign `defaultValueSymbol` to any described property to achieve the same effect.
+### Changes and rejections
 
-### Possible values
+```javascript
+const schema = {
+    date: {
+        type: "String",
+        pattern: /^\d{4}-\d{2}-\d{2}$/,
+        hint: "yyyy-mm-dd",
+        value: "1970-01-01"
+    }
+};
 
-There are two ways to describe possible values.
-
-1). Using a pattern with optional hint:
-
-```js
-const post = new GetSet({
-    id: ["Number", 0, "[0-9]+", "a positive integer"]
-});
-post.id = -1;
-// Error: Property 'id' should be a positive integer, but got '-1'
-```
-
-2). Using a custom function:
-
-```js
-const post = new GetSet({
-    id: ["Number", 0, Number.isSafeInteger]
-});
-post.id = Math.pow(2, 53);
-// Error: Property 'id' does not accept value '9007199254740992'
-```
-
-To describe a value that cannot be changed, use `constant`:
-
-```js
-import {GetSet, constant} from "@indiejs/get-set";
-
-const post = new GetSet({
-    id: [constant, 1]
-});
-post.id = 0;
-// Error: Property 'id' is constant
-```
-
-### Observable object
-
-To observe changes override `didChangeProperty` method:
-
-```js
 class Post extends GetSet {
     constructor() {
-        super({
-            id: ["Number", 0, "[0-9]+", "a positive integer"]
-        });
+        super(schema);
     }
-    didChangeProperty(name, oldValue, newValue) {
-        console.log(`Did change ${name}, new value: ${newValue}`);
+    didChangeProperty() {
+        console.log(...arguments);
+    }
+    didRejectProperty() {
+        console.log(...arguments);
     }
 }
+
+const post = new Post;
+post.date = "2020-01-01";
+post.date = new Date;
 ```
 
-Then initialize it and treat like a regular object:
+#### Events
 
-```js
-const post = new Post();
-post.id = 1;
+```javascript
+import {EventEmitter} from "events";
+
+class Post extends GetSet.extends(EventEmitter, {seal: false}) {
+    constructor() {
+        super(schema);
+    }
+    didChangeProperty() {
+        this.emit("change", ...arguments);
+    }
+    didRejectProperty() {
+        this.emit("reject", ...arguments);
+    }
+}
+
+const post = new Post()
+    .on("change", console.log)
+    .on("reject", console.log);
 ```
 
-The following will work as expected:
+### Tree structures
 
-```js
-Object.assign(post, {id: 2}); // {id: 2}
-JSON.stringify(post); // "{\"id\": 2}"
+```javascript
+const post = new GetSet({
+    date: {
+        type: "String",
+        value: "1970-01-01"
+    },
+    author: new GetSet({
+        name: {
+            type: "String",
+            value: "John Doe"
+        },
+        url: {
+            type: "String",
+            value: "example.org"
+        }
+    })
+});
 ```
 
-## Methods
+#### Selective assign
 
-### `didChangeProperty(name, oldValue, newValue)`
+```javascript
+post.author = "";
+// Does nothing
 
-Called when a property value did change.
+post.author.name = "John Doe";
+// Updates name
 
-Parameter | Type             | Description
-----------|------------------|-----------------
-name      | `String`         | A property name.
-oldValue  | `Any`            | An old value.
-newValue  | `Any`            | A new value.
+post.author = { name: "John Doe" };
+// Updates name only
 
-### `resetProperties([whitelist])`
+Object.assign(post, { author: { name: "John Doe" } });
+// Updates name only
+```
 
-Resets multiple properties to default values.
+### Serialization
 
-Parameter | Type             | Description
-----------|------------------|-----------------
-whitelist | `Array<String>`  | A list of properties to reset.
+```javascript
+post.toJSON();
 
-### `toJSON([whitelist])`
+JSON.stringify(post);
+```
 
-Creates a plain object.
 
-Parameter | Type             | Description
-----------|------------------|-----------------
-whitelist | `Array<String>`  | A list of properties to include.
-
-### `throwException(...message)`
-
-Throws an exception.
-
-Parameter | Type             | Description
-----------|------------------|-----------------
-message   | `String`         | An exception message.
+See [API reference](#) for more info.
 
 ## License
 
