@@ -25,13 +25,13 @@ describe("GetSet", () => {
 
     });
 
-    describe("#constructor(descriptors)", () => {
+    describe("#constructor(descriptors[, ...rest])", () => {
 
-        it("Requires 1 argument", () => {
+        it("Requires at least 1 argument", () => {
             assert.throws(() => {
                 new GetSet();
             }, {
-                message: "Required 1 argument"
+                message: "Required at least 1 argument"
             });
             assert.doesNotThrow(() => {
                 new GetSet({});
