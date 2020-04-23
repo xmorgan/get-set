@@ -1,7 +1,29 @@
 import {strict as assert} from "assert";
+import {EventEmitter} from "events";
 import {GetSet} from "../index.js";
 
 describe("GetSet", () => {
+
+    describe(".extends(Base[, options])", () => {
+
+        it("Returns new GetSet class, that extends base class.", () => {
+            const GetSetEmitter = GetSet.extends(EventEmitter);
+            assert.equal(
+                new GetSetEmitter({}) instanceof EventEmitter,
+                true
+            );
+        });
+
+        it("Recognizes 'seal' option", (done) => {
+            const GetSetEmitter = GetSet.extends(EventEmitter, {
+                seal: false
+            });
+            new GetSetEmitter({})
+                .on("test", () => done())
+                .emit("test");
+        });
+
+    });
 
     describe("#constructor(descriptors)", () => {
 
