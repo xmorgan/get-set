@@ -1,6 +1,6 @@
 - [Installation](#installation)
 - [Usage](#usage)
-- [API reference](#)
+- [API reference](https://indiejs.github.io/get-set/#getset)
 - [License](#license)
 
 ## Installation
@@ -205,8 +205,7 @@ post.toJSON();
 JSON.stringify(post);
 ```
 
-
-See [API reference](#) for more info.
+See [API reference](https://indiejs.github.io/get-set/#getset) for more info.
 
 ## License
 
