@@ -104,7 +104,7 @@ const post = new GetSet({
 });
 
 post.date = "2020-01-01";
-post.resetProperties();
+post.toDefaults();
 post.date;
 // 1970-01-01
 ```
