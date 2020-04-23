@@ -3,37 +3,41 @@ import {GetSetEntry, GetSet, readOnly, defaultValue} from "../index.js";
 
 const {didChangeProperty} = GetSet.prototype;
 
-describe("new GetSetEntry({name, type, value, pattern, hint}, owner)", () => {
+describe("GetSetEntry", () => {
 
-    it("Requires at least 1 argument", () => {
-        assert.throws(() => {
-            new GetSetEntry;
-        });
-        assert.doesNotThrow(() => {
-            new GetSetEntry({});
-        });
-    });
+    describe("#constructor({name, type, value, pattern, hint}, owner)", () => {
 
-    it("Throws, if 'type' neither a string, nor a function", () => {
-        assert.throws(() => {
-            new GetSetEntry({
-                name: "bad-type",
-                type: null
-            }, {});
-        }, {
-            message: "Entry 'bad-type': Cannot define 'type', using null (Null)"
+        it("Requires at least 1 argument", () => {
+            assert.throws(() => {
+                new GetSetEntry;
+            });
+            assert.doesNotThrow(() => {
+                new GetSetEntry({});
+            });
         });
-    });
 
-    it("Throws, if 'pattern' neither a regexp, nor a function", () => {
-        assert.throws(() => {
-            new GetSetEntry({
-                name: "bad-pattern",
-                pattern: null
-            }, {});
-        }, {
-            message: "Entry 'bad-pattern': Cannot define 'pattern', using null (Null)"
+        it("Throws, if 'type' neither a string, nor a function", () => {
+            assert.throws(() => {
+                new GetSetEntry({
+                    name: "bad-type",
+                    type: null
+                }, {});
+            }, {
+                message: "Entry 'bad-type': Cannot define 'type', using null (Null)"
+            });
         });
+
+        it("Throws, if 'pattern' neither a regexp, nor a function", () => {
+            assert.throws(() => {
+                new GetSetEntry({
+                    name: "bad-pattern",
+                    pattern: null
+                }, {});
+            }, {
+                message: "Entry 'bad-pattern': Cannot define 'pattern', using null (Null)"
+            });
+        });
+
     });
 
     describe("#throw(...message)", () => {
@@ -119,11 +123,11 @@ describe("new GetSetEntry({name, type, value, pattern, hint}, owner)", () => {
 
     describe("#update(value)", () => {
 
-        it("Calls owner, if a change has occurred", (done) => {
+        it("Calls owner, if change has occurred", (done) => {
             new GetSetEntry({
                 name: "test",
             }, {
-                didChangeProperty({name, oldValue, newValue}) {
+                didChangeProperty(name, oldValue, newValue) {
                     assert.equal(name, "test");
                     assert.equal(oldValue, undefined);
                     assert.equal(newValue, 1);
@@ -133,7 +137,7 @@ describe("new GetSetEntry({name, type, value, pattern, hint}, owner)", () => {
                 .update(1);
         });
 
-        it("Merges object, if entry is node", () => {
+        it("Merges object, if is node", () => {
             const entry = new GetSetEntry({
                 value: new GetSet({
                     keyOne: { value: 1 },
@@ -151,17 +155,20 @@ describe("new GetSetEntry({name, type, value, pattern, hint}, owner)", () => {
             assert.equal(entry.value.keyTwo, 2);
         });
 
-
-        it("Throws, if a property is read-only", () => {
-            assert.throws(() => {
-                new GetSetEntry({
-                    name: "read-only",
-                    type: readOnly
-                }, {})
-                    .update(1);
+        it("Rejects, if read-only", (done) => {
+            new GetSetEntry({
+                name: "read-only",
+                type: readOnly
             }, {
-                message: "Entry 'read-only': Read-only"
-            });
+                didRejectProperty(name, {message}) {
+                    assert.equal(
+                        message,
+                        "Entry 'read-only': Read-only"
+                    );
+                    done();
+                }
+            })
+                .update(1);
         });
 
         it("Recognizes default value symbol", () => {
@@ -177,72 +184,83 @@ describe("new GetSetEntry({name, type, value, pattern, hint}, owner)", () => {
             assert.equal(entry.value, 1);
         });
 
-        it("Throws, if #type does not match", () => {
-            assert.throws(() => {
-                new GetSetEntry({
-                    name: "number-only",
-                    type: "Number"
-                }, {
-                    didChangeProperty
-                })
-                    .update("1");
+        it("Rejects, if #type does not match", (done) => {
+            new GetSetEntry({
+                name: "number-only",
+                type: "Number"
             }, {
-                message: "Entry 'number-only': The type pattern (Number) does not match value type (String)"
-            });
+                didRejectProperty(name, reason) {
+                    assert.equal(
+                        reason.message,
+                        "Entry 'number-only': The type pattern (Number) does not match value type (String)"
+                    );
+                    done();
+                }
+            })
+                .update("1");
         });
 
-        it("Throws, if #type function returns false", () => {
-            assert.throws(() => {
-                new GetSetEntry({
-                    name: "custom-type",
-                    type: () => false
-                }, {
-                    didChangeProperty
-                })
-                    .update("1");
+        it("Rejects, if #type function returns false", (done) => {
+            new GetSetEntry({
+                name: "custom-type",
+                type: () => false
             }, {
-                message: "Entry 'custom-type': The type pattern does not match value type (String)"
-            });
+                didRejectProperty(name, reason) {
+                    assert.equal(
+                        reason.message,
+                        "Entry 'custom-type': The type pattern does not match value type (String)"
+                    );
+                    done();
+                }
+            })
+                .update("1");
         });
 
-        it("Throws, if #pattern does not match ", () => {
-            assert.throws(() => {
-                new GetSetEntry({
-                    name: "positive-integer",
-                    pattern: /^\d+$/
-                }, {
-                    didChangeProperty
-                })
-                    .update(-1.5);
+        it("Rejects, if #pattern does not match", (done) => {
+            new GetSetEntry({
+                name: "positive-integer",
+                pattern: /^\d+$/
             }, {
-                message: "Entry 'positive-integer': The /^\\d+$/ pattern does not match value -1.5"
-            });
-            assert.throws(() => {
-                new GetSetEntry({
-                    name: "positive-integer",
-                    pattern: /^\d+$/,
-                    hint: "positive integer"
-                }, {
-                    didChangeProperty
-                })
-                    .update(-1.5);
-            }, {
-                message: "Entry 'positive-integer': The positive integer pattern does not match value -1.5"
-            });
+                didRejectProperty(name, reason) {
+                    assert.equal(
+                        reason.message,
+                        "Entry 'positive-integer': The /^\\d+$/ pattern does not match value -1.5"
+                    );
+                    done();
+                }
+            })
+                .update(-1.5);
+
+            // new GetSetEntry({
+            //     name: "positive-integer",
+            //     pattern: /^\d+$/,
+            //     hint: "positive integer"
+            // }, {
+            //     didRejectProperty(name, reason) {
+            //         assert.equal(
+            //             reason,
+            //             "Entry 'positive-integer': The positive integer pattern does not match value -1.5"
+            //         );
+            //         done();
+            //     }
+            // })
+            //     .update(-1.5);
         });
 
-        it("Throws, if #pattern function returns false", () => {
-            assert.throws(() => {
-                new GetSetEntry({
-                    name: "custom-pattern",
-                    pattern: () => false
-                }, {
-                    didChangeProperty
-                })
-                    .update(-1.5);
+        it("Rejects, if #pattern function returns false", (done) => {
+            new GetSetEntry({
+                name: "custom-pattern",
+                pattern: () => false
             }, {
-                message: "Entry 'custom-pattern': The custom pattern does not match value -1.5"
-            });
+                didRejectProperty(name, reason) {
+                    assert.equal(
+                        reason.message,
+                        "Entry 'custom-pattern': The custom pattern does not match value -1.5"
+                    );
+                    done();
+                }
+            })
+                .update(-1.5);
         });
 
         it("Updates value", () => {

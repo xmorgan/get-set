@@ -1,55 +1,30 @@
 import {strict as assert} from "assert";
 import {GetSet} from "../index.js";
 
-describe("new GetSet(entries[, options])", () => {
+describe("GetSet", () => {
 
-    it("Requires 1 argument", () => {
-        assert.throws(() => {
-            new GetSet();
-        }, {
-            message: "Required 1 argument"
+    describe("#constructor(descriptors)", () => {
+
+        it("Requires 1 argument", () => {
+            assert.throws(() => {
+                new GetSet();
+            }, {
+                message: "Required 1 argument"
+            });
+            assert.doesNotThrow(() => {
+                new GetSet({});
+            });
         });
-        assert.doesNotThrow(() => {
-            new GetSet({});
-        });
-    });
 
-    it("Defines properties", () => {
-        const map = new GetSet({
-            keyOne: {},
-            keyTwo: {}
-        });
-        assert.deepEqual(Object.keys(map), [
-            "keyOne",
-            "keyTwo"
-        ]);
-    });
-
-    describe("#didChangeProperty({name, oldValue, newValue})", () => {
-
-        it("Called on each level", (done) => {
-            class Post extends GetSet {
-                constructor() {
-                    super({
-                        title: {},
-                        author: new GetSet({
-                            name: {}
-                        })
-                    });
-                }
-                didChangeProperty({name}) {
-                    paths.delete(name);
-                    paths.size || done();
-                }
-            }
-
-            const post = new Post;
-            const paths = new Set([
-                "title",
-                "author.name"
+        it("Defines properties", () => {
+            const map = new GetSet({
+                keyOne: {},
+                keyTwo: {}
+            });
+            assert.deepEqual(Object.keys(map), [
+                "keyOne",
+                "keyTwo"
             ]);
-            post.title = "";
-            post.author.name = "";
         });
 
     });
@@ -132,6 +107,64 @@ describe("new GetSet(entries[, options])", () => {
                 JSON.stringify(post),
                 '{"author":{"name":""}}'
             );
+        });
+
+    });
+
+    describe("#didChangeProperty(name, oldValue, newValue)", () => {
+
+        it("Bubbles", (done) => {
+            class Post extends GetSet {
+                constructor() {
+                    super({
+                        title: {},
+                        author: new GetSet({
+                            name: {}
+                        })
+                    });
+                }
+                didChangeProperty(name) {
+                    paths.delete(name);
+                    paths.size || done();
+                }
+            }
+
+            const post = new Post;
+            const paths = new Set([
+                "title",
+                "author.name"
+            ]);
+            post.title = "";
+            post.author.name = "";
+        });
+
+    });
+
+    describe("#didRejectProperty(name, reason)", () => {
+
+        it("Bubbles", (done) => {
+            class Post extends GetSet {
+                constructor() {
+                    super({
+                        title: { type: "String" },
+                        author: new GetSet({
+                            name: { type: "String" }
+                        })
+                    });
+                }
+                didRejectProperty(name) {
+                    paths.delete(name);
+                    paths.size || done();
+                }
+            }
+            const post = new Post;
+            const paths = new Set([
+                "title",
+                "author.name"
+            ]);
+            console.error = () => null;
+            post.title = null;
+            post.author.name = null;
         });
 
     });
