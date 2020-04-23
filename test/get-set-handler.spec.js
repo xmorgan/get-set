@@ -1,7 +1,7 @@
 import {strict as assert} from "assert";
 import {GetSetHandler, GetSetEntry} from "../index.js";
 
-describe("new Proxy({}, new GetSetHandler)", () => {
+describe("GetSetHandler", () => {
 
     describe("#get(target, property)", () => {
 
@@ -41,7 +41,7 @@ describe("new Proxy({}, new GetSetHandler)", () => {
 
     describe("#getOwnPropertyDescriptor(target, property)", () => {
 
-        it("Returns #value of GetSetEntry", () => {
+        it("Returns value of GetSetEntry", () => {
             const proxy = new Proxy({
                 key: new GetSetEntry({
                     value: 1
