@@ -31,16 +31,15 @@ describe("GetSetHandler", () => {
 
     describe("#set(target, property, value, receiver)", () => {
 
-        it("Throws, if property does not point to GetSetEntry", () => {
+        it("Throws on new properties, if 'seal' enabled", () => {
             assert.throws(() => {
-                new Proxy({}, new GetSetHandler).key = 1;
+                new Proxy({}, new GetSetHandler({ seal: true })).key = 1;
             });
-        });
-        it("Does not throws, if 'seal' disabled", () => {
             assert.doesNotThrow(() => {
-                new Proxy({}, new GetSetHandler({ seal: false })).key = 1;
+                new Proxy({}, new GetSetHandler()).key = 1;
             });
         });
+
     });
 
     describe("#getOwnPropertyDescriptor(target, property)", () => {

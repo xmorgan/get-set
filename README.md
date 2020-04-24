@@ -1,6 +1,6 @@
 - [Installation](#installation)
 - [Usage](#usage)
-- [API reference](#)
+- [API reference](https://indiejs.github.io/get-set/#getset)
 - [License](#license)
 
 ## Installation
@@ -104,7 +104,7 @@ const post = new GetSet({
 });
 
 post.date = "2020-01-01";
-post.resetProperties();
+post.toDefaults();
 post.date;
 // 1970-01-01
 ```
@@ -143,7 +143,7 @@ post.date = new Date;
 ```javascript
 import {EventEmitter} from "events";
 
-class Post extends GetSet.extends(EventEmitter, {seal: false}) {
+class Post extends GetSet.extends(EventEmitter) {
     constructor() {
         super(schema);
     }
@@ -205,8 +205,7 @@ post.toJSON();
 JSON.stringify(post);
 ```
 
-
-See [API reference](#) for more info.
+See [API reference](https://indiejs.github.io/get-set/#getset) for more info.
 
 ## License
 
