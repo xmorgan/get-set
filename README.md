@@ -143,7 +143,7 @@ post.date = new Date;
 ```javascript
 import {EventEmitter} from "events";
 
-class Post extends GetSet.extends(EventEmitter, {seal: false}) {
+class Post extends GetSet.extends(EventEmitter) {
     constructor() {
         super(schema);
     }
