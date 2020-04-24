@@ -125,10 +125,10 @@ class Post extends GetSet {
     constructor() {
         super(schema);
     }
-    didChangeProperty() {
+    handlePropertyChange() {
         console.log(...arguments);
     }
-    didRejectProperty() {
+    handlePropertyReject() {
         console.log(...arguments);
     }
 }
@@ -147,10 +147,10 @@ class Post extends GetSet.extends(EventEmitter) {
     constructor() {
         super(schema);
     }
-    didChangeProperty() {
+    handlePropertyChange() {
         this.emit("change", ...arguments);
     }
-    didRejectProperty() {
+    handlePropertyReject() {
         this.emit("reject", ...arguments);
     }
 }

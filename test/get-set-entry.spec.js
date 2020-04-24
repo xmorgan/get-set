@@ -1,7 +1,7 @@
 import {strict as assert} from "assert";
 import {GetSetEntry, GetSet, readOnly, defaultValue} from "../index.js";
 
-const {didChangeProperty} = GetSet.prototype;
+const {handlePropertyChange} = GetSet.prototype;
 
 describe("GetSetEntry", () => {
 
@@ -127,7 +127,7 @@ describe("GetSetEntry", () => {
             new GetSetEntry({
                 name: "test",
             }, {
-                didChangeProperty(name, oldValue, newValue) {
+                handlePropertyChange(name, oldValue, newValue) {
                     assert.equal(name, "test");
                     assert.equal(oldValue, undefined);
                     assert.equal(newValue, 1);
@@ -143,10 +143,10 @@ describe("GetSetEntry", () => {
                     keyOne: { value: 1 },
                     keyTwo: { value: 2 }
                 }, {
-                    didChangeProperty
+                    handlePropertyChange
                 })
             }, {
-                didChangeProperty
+                handlePropertyChange
             });
 
             entry.update({ keyOne: 0 });
@@ -160,7 +160,7 @@ describe("GetSetEntry", () => {
                 name: "read-only",
                 type: readOnly
             }, {
-                didRejectProperty(name, {message}) {
+                handlePropertyReject(name, {message}) {
                     assert.equal(
                         message,
                         "Entry 'read-only': Read-only"
@@ -175,7 +175,7 @@ describe("GetSetEntry", () => {
             const entry = new GetSetEntry({
                 value: 1
             }, {
-                didChangeProperty
+                handlePropertyChange
             });
 
             entry.update(2);
@@ -189,7 +189,7 @@ describe("GetSetEntry", () => {
                 name: "number-only",
                 type: "Number"
             }, {
-                didRejectProperty(name, reason) {
+                handlePropertyReject(name, reason) {
                     assert.equal(
                         reason.message,
                         "Entry 'number-only': The type pattern (Number) does not match value type (String)"
@@ -205,7 +205,7 @@ describe("GetSetEntry", () => {
                 name: "custom-type",
                 type: () => false
             }, {
-                didRejectProperty(name, reason) {
+                handlePropertyReject(name, reason) {
                     assert.equal(
                         reason.message,
                         "Entry 'custom-type': The type pattern does not match value type (String)"
@@ -221,7 +221,7 @@ describe("GetSetEntry", () => {
                 name: "positive-integer",
                 pattern: /^\d+$/
             }, {
-                didRejectProperty(name, reason) {
+                handlePropertyReject(name, reason) {
                     assert.equal(
                         reason.message,
                         "Entry 'positive-integer': The /^\\d+$/ pattern does not match value -1.5"
@@ -236,7 +236,7 @@ describe("GetSetEntry", () => {
             //     pattern: /^\d+$/,
             //     hint: "positive integer"
             // }, {
-            //     didRejectProperty(name, reason) {
+            //     handlePropertyReject(name, reason) {
             //         assert.equal(
             //             reason,
             //             "Entry 'positive-integer': The positive integer pattern does not match value -1.5"
@@ -252,7 +252,7 @@ describe("GetSetEntry", () => {
                 name: "custom-pattern",
                 pattern: () => false
             }, {
-                didRejectProperty(name, reason) {
+                handlePropertyReject(name, reason) {
                     assert.equal(
                         reason.message,
                         "Entry 'custom-pattern': The custom pattern does not match value -1.5"
@@ -268,7 +268,7 @@ describe("GetSetEntry", () => {
                 type: "Number",
                 pattern: /^\d+$/
             }, {
-                didChangeProperty
+                handlePropertyChange
             });
             entry.update(1);
             assert.equal(entry.value, 1);

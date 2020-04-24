@@ -133,7 +133,7 @@ describe("GetSet", () => {
 
     });
 
-    describe("#didChangeProperty(name, oldValue, newValue)", () => {
+    describe("#handlePropertyChange(name, oldValue, newValue)", () => {
 
         it("Bubbles", (done) => {
             class Post extends GetSet {
@@ -145,7 +145,7 @@ describe("GetSet", () => {
                         })
                     });
                 }
-                didChangeProperty(name) {
+                handlePropertyChange(name) {
                     paths.delete(name);
                     paths.size || done();
                 }
@@ -162,7 +162,7 @@ describe("GetSet", () => {
 
     });
 
-    describe("#didRejectProperty(name, reason)", () => {
+    describe("#handlePropertyReject(name, reason)", () => {
 
         it("Bubbles", (done) => {
             class Post extends GetSet {
@@ -174,7 +174,7 @@ describe("GetSet", () => {
                         })
                     });
                 }
-                didRejectProperty(name) {
+                handlePropertyReject(name) {
                     paths.delete(name);
                     paths.size || done();
                 }
