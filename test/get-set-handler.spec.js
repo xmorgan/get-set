@@ -31,12 +31,16 @@ describe("GetSetHandler", () => {
 
     describe("#set(target, property, value, receiver)", () => {
 
-        it("Throws on new properties, if 'seal' enabled", () => {
+        it("Allows custom properties by default", () => {
+            const proxy = new Proxy({}, new GetSetHandler);
+            proxy.key = 1;
+            assert.equal(proxy.key, 1);
+        });
+
+        it("Disallows custom properties, if 'seal' enabled", () => {
             assert.throws(() => {
-                new Proxy({}, new GetSetHandler({ seal: true })).key = 1;
-            });
-            assert.doesNotThrow(() => {
-                new Proxy({}, new GetSetHandler()).key = 1;
+                const proxy = new Proxy({}, new GetSetHandler({ seal: true }));
+                proxy.key = 1;
             });
         });
 

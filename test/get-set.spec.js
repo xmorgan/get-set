@@ -25,7 +25,7 @@ describe("GetSet", () => {
 
     });
 
-    describe("#constructor(descriptors[, ...rest])", () => {
+    describe("#constructor(schema[, ...rest])", () => {
 
         it("Requires at least 1 argument", () => {
             assert.throws(() => {
