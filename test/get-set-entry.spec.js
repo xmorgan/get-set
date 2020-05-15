@@ -16,6 +16,13 @@ describe("GetSetEntry", () => {
             });
         });
 
+        it("May detect 'type' by 'value'", () => {
+            assert.equal(
+                new GetSetEntry({value: true}, {}).type,
+                "Boolean"
+            );
+        });
+
         it("Throws, if 'type' neither a string, nor a function", () => {
             assert.throws(() => {
                 new GetSetEntry({
@@ -214,21 +221,6 @@ describe("GetSetEntry", () => {
                 }
             })
                 .update(-1.5);
-
-            // new GetSetEntry({
-            //     name: "positive-integer",
-            //     pattern: /^\d+$/,
-            //     hint: "positive integer"
-            // }, {
-            //     handlePropertyReject(name, reason) {
-            //         assert.equal(
-            //             reason,
-            //             "Entry 'positive-integer': The positive integer pattern does not match value -1.5"
-            //         );
-            //         done();
-            //     }
-            // })
-            //     .update(-1.5);
         });
 
         it("Rejects, if #pattern function returns false", (done) => {
