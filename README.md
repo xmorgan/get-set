@@ -1,7 +1,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [API reference](https://indiejs.github.io/get-set/#getset)
-- [Tips & tricks](#tips-tricks)
+- [Tips & tricks](#tips--tricks)
 - [License](#license)
 
 ## Installation
