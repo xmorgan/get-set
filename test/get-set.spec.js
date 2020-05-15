@@ -4,7 +4,7 @@ import {GetSet} from "../index.js";
 
 describe("GetSet", () => {
 
-    describe(".extends(Base[, options])", () => {
+    describe(".extends(Base)", () => {
 
         it("Returns new GetSet class, that extends base class.", () => {
             const GetSetEmitter = GetSet.extends(EventEmitter);
@@ -12,15 +12,6 @@ describe("GetSet", () => {
                 new GetSetEmitter({}) instanceof EventEmitter,
                 true
             );
-        });
-
-        it("Recognizes 'seal' option", (done) => {
-            const GetSetEmitter = GetSet.extends(EventEmitter, {
-                seal: false
-            });
-            new GetSetEmitter({})
-                .on("test", () => done())
-                .emit("test");
         });
 
     });
