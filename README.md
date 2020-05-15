@@ -1,6 +1,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [API reference](https://indiejs.github.io/get-set/#getset)
+- [Tips & tricks](#tips-tricks)
 - [License](#license)
 
 ## Installation
@@ -206,6 +207,40 @@ JSON.stringify(post);
 ```
 
 See [API reference](https://indiejs.github.io/get-set/#getset) for more info.
+
+## Tips & tricks
+
+### Optional type
+
+```javascript
+const post = new GetSet({
+    draft: {
+        value: false
+    }
+});
+
+post.draft = "true";
+// Error: Entry 'draft': The type pattern (Boolean) does not match value type (String)
+```
+
+### Partially typed object
+
+```javascript
+class Post extends GetSet {
+    constructor() {
+        super({
+            draft: {
+                value: false
+            }
+        });
+        Object.defineProperties(this, {
+            id: {
+                value: 123
+            }
+        });
+    }
+}
+```
 
 ## License
 
