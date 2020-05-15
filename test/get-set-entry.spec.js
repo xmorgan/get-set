@@ -1,5 +1,5 @@
 import {strict as assert} from "assert";
-import {GetSetEntry, GetSet, readOnly, defaultValue} from "../index.js";
+import {GetSetEntry, GetSet, defaultValue} from "../index.js";
 
 const {handlePropertyChange} = GetSet.prototype;
 
@@ -153,22 +153,6 @@ describe("GetSetEntry", () => {
 
             assert.equal(entry.value.keyOne, 0);
             assert.equal(entry.value.keyTwo, 2);
-        });
-
-        it("Rejects, if read-only", (done) => {
-            new GetSetEntry({
-                name: "read-only",
-                type: readOnly
-            }, {
-                handlePropertyReject(name, {message}) {
-                    assert.equal(
-                        message,
-                        "Entry 'read-only': Read-only"
-                    );
-                    done();
-                }
-            })
-                .update(1);
         });
 
         it("Recognizes default value symbol", () => {
