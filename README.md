@@ -41,7 +41,7 @@ post.date = new Date;
 
 #### Custom type validity
 
-For custom type validity, use a function, that:
+For custom type validity use a function, that:
 - returns true, if type of a value is valid
 - returns false or throws an error, if type of a value is invalid
 
@@ -89,7 +89,7 @@ post.date = "01/01/1970";
 
 #### Custom value validity
 
-For custom value validity, use a function, that:
+For custom value validity use a function, that:
 - returns true, if value is valid
 - returns false or throws an error, if value is invalid
 
