@@ -1,7 +1,6 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [API reference](https://indiejs.github.io/get-set/#getset)
-- [Tips & tricks](#tips--tricks)
 - [License](#license)
 
 ## Installation
@@ -31,31 +30,32 @@ import {GetSet} from "./get-set/index.js";
 ```javascript
 const post = new GetSet({
     date: {
-        type: "String|Number"
+        type: "Null|String"
     }
 });
 
 post.date = new Date;
-// Error: Entry 'date': The type pattern (String|Number) does not match value type (Date)
+// Error: Entry 'date': The type pattern (Null|String) does not match value type (Date)
 
 ```
 
-#### Custom validity
+#### Custom type validity
+
+For custom type validity, use a function, that:
+- returns true, if type of a value is valid
+- returns false or throws an error, if type of a value is invalid
 
 ```javascript
 const post = new GetSet({
     date: {
         type(value) {
-            if (typeof value == "string" || typeof value == "number") {
+            if (typeof value == "string") {
                 return true;
             }
             throw "Invalid type";
         }
     }
 });
-
-post.date = new Date;
-// Error: Invalid type
 ```
 
 ### Value pattern
@@ -63,24 +63,26 @@ post.date = new Date;
 ```javascript
 const post = new GetSet({
     date: {
-        type: "String",
-        pattern: /^\d{4}-\d{2}-\d{2}$/,
-        hint: "yyyy-mm-dd"
+        pattern: /^(\d{4}-\d{2}-\d{2})?$/,
+        hint: "YYYY-MM-DD"
     }
 });
 
-post.date = "1970";
-// Error: Entry 'date': The yyyy-mm-dd pattern does not match value 1970
+post.date = "01/01/1970";
+// Error: Entry 'date': The YYYY-MM-DD pattern does not match value 01/01/1970
 ```
 
-#### Custom validity
+#### Custom value validity
+
+For custom value validity, use a function, that:
+- returns true, if value is valid
+- returns false or throws an error, if value is invalid
 
 ```javascript
 const post = new GetSet({
     date: {
-        type: "String",
         pattern(value) {
-            if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            if (/^(\d{4}-\d{2}-\d{2})?$/.test(value)) {
                 return true;
             }
             throw "Invalid format";
@@ -88,7 +90,7 @@ const post = new GetSet({
     }
 });
 
-post.date = "1970";
+post.date = "01/01/1970";
 // Error: Invalid format
 ```
 
@@ -97,9 +99,6 @@ post.date = "1970";
 ```javascript
 const post = new GetSet({
     date: {
-        type: "String",
-        pattern: /^\d{4}-\d{2}-\d{2}$/,
-        hint: "yyyy-mm-dd",
         value: "1970-01-01"
     }
 });
@@ -115,10 +114,9 @@ post.date;
 ```javascript
 const schema = {
     date: {
-        type: "String",
-        pattern: /^\d{4}-\d{2}-\d{2}$/,
-        hint: "yyyy-mm-dd",
-        value: "1970-01-01"
+        value: "",
+        pattern: /^(\d{4}-\d{2}-\d{2})?$/,
+        hint: "YYYY-MM-DD"
     }
 };
 
@@ -166,16 +164,13 @@ const post = new Post()
 ```javascript
 const post = new GetSet({
     date: {
-        type: "String",
         value: "1970-01-01"
     },
     author: new GetSet({
         name: {
-            type: "String",
             value: "John Doe"
         },
         url: {
-            type: "String",
             value: "example.org"
         }
     })
@@ -207,40 +202,6 @@ JSON.stringify(post);
 ```
 
 See [API reference](https://indiejs.github.io/get-set/#getset) for more info.
-
-## Tips & tricks
-
-### Optional type
-
-```javascript
-const post = new GetSet({
-    draft: {
-        value: false
-    }
-});
-
-post.draft = "true";
-// Error: Entry 'draft': The type pattern (Boolean) does not match value type (String)
-```
-
-### Partially typed object
-
-```javascript
-class Post extends GetSet {
-    constructor() {
-        super({
-            draft: {
-                value: false
-            }
-        });
-        Object.defineProperties(this, {
-            id: {
-                value: 123
-            }
-        });
-    }
-}
-```
 
 ## License
 
