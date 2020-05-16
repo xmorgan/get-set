@@ -58,6 +58,21 @@ const post = new GetSet({
 });
 ```
 
+### Default value
+
+```javascript
+const post = new GetSet({
+    date: {
+        value: "1970-01-01"
+    }
+});
+
+post.date = "2020-01-01";
+post.toDefaults();
+post.date;
+// 1970-01-01
+```
+
 ### Value pattern
 
 ```javascript
@@ -94,21 +109,6 @@ post.date = "01/01/1970";
 // Error: Invalid format
 ```
 
-### Default value
-
-```javascript
-const post = new GetSet({
-    date: {
-        value: "1970-01-01"
-    }
-});
-
-post.date = "2020-01-01";
-post.toDefaults();
-post.date;
-// 1970-01-01
-```
-
 ### Changes and rejections
 
 ```javascript
@@ -133,8 +133,9 @@ class Post extends GetSet {
 }
 
 const post = new Post;
-post.date = "2020-01-01";
 post.date = new Date;
+post.date = "01/01/1970";
+post.date = "1970-01-01";
 ```
 
 #### Events
